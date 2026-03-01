@@ -70,15 +70,9 @@ if (!function_exists('view')) {
      */
     function view(string $viewName, array $data = []): mixed
     {
-        $config = require __DIR__ . '/../../config/app.php';
-        $viewPath = $config['paths']['views'];
-        $engineType = $config['app']['view_engine'] ?? 'php';
+        $viewPath = __DIR__ . '/../../resources/views';
 
-        if ($engineType === 'twig') {
-            $engine = new \Core\View\TwigEngine($viewPath);
-        } else {
-            $engine = new \Core\View\PhpEngine($viewPath);
-        }
+        $engine = new \Core\View\PhpEngine($viewPath);
 
         return $engine->render($viewName, $data);
     }

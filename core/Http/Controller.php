@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Core\Http;
 
 use Core\View\PhpEngine;
-use Core\View\TwigEngine;
 use Core\View\EngineInterface;
 
 abstract class Controller
@@ -17,13 +16,8 @@ abstract class Controller
         $config = require __DIR__ . '/../../config/app.php';
 
         $viewPath = $config['paths']['views'];
-        $engineType = $config['app']['view_engine'] ?? 'php';
 
-        if ($engineType === 'twig') {
-            $this->engine = new TwigEngine($viewPath);
-        } else {
-            $this->engine = new PhpEngine($viewPath);
-        }
+        $this->engine = new PhpEngine($viewPath);
     }
 
     protected function view(string $view, array $data = []): void
