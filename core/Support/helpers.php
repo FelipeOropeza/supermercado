@@ -70,7 +70,8 @@ if (!function_exists('view')) {
      */
     function view(string $viewName, array $data = []): mixed
     {
-        $viewPath = __DIR__ . '/../../resources/views';
+        $config = require __DIR__ . '/../../config/app.php';
+        $viewPath = $config['paths']['views'];
 
         $engine = new \Core\View\PhpEngine($viewPath);
 
