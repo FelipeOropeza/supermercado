@@ -17,6 +17,12 @@ abstract class Model
     /** @var string Nome da chave primária */
     protected string $primaryKey = 'id';
 
+    /** @var array Lista de colunas seguras e permitidas para serem manipuladas em massa */
+    protected array $fillable = [];
+
+    /** @var bool Ativa/Desativa controle automático das colunas created_at e updated_at */
+    public bool $timestamps = true;
+
     public function __construct()
     {
         $this->db = Connection::getInstance();
@@ -79,9 +85,7 @@ abstract class Model
      */
     public function all(): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table}");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_CLASS, static::class);
+        return $this->newQuery()->get();
     }
 
     /**
@@ -109,6 +113,15 @@ abstract class Model
      */
     public function insert(array $data): int
     {
+        $data = $this->filterFillable($data);
+        $data = $this->applyMutators($data);
+
+        if ($this->timestamps && !isset($data['created_at'])) {
+            $now = date('Y-m-d H:i:s');
+            $data['created_at'] = $now;
+            $data['updated_at'] = $now;
+        }
+
         $columns = implode(', ', array_keys($data));
         // Cria os placeholders (:nome, :email)
         $placeholders = ':' . implode(', :', array_keys($data));
@@ -135,6 +148,13 @@ abstract class Model
      */
     public function update(mixed $id, array $data): bool
     {
+        $data = $this->filterFillable($data);
+        $data = $this->applyMutators($data);
+
+        if ($this->timestamps && !isset($data['updated_at'])) {
+            $data['updated_at'] = date('Y-m-d H:i:s');
+        }
+
         $fields = [];
         foreach ($data as $key => $value) {
             $fields[] = "{$key} = :{$key}";
@@ -181,5 +201,96 @@ abstract class Model
         $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Inicia o construtor de consultas avançadas (QueryBuilder).
+     */
+    public function newQuery(): QueryBuilder
+    {
+        return new QueryBuilder($this->db, $this->table, static::class);
+    }
+
+    /**
+     * Inicia uma verificação fluente na Tabela
+     * Ex: $produto->where('preco', '>', 50)->get();
+     */
+    public function where(string $column, string $operator, mixed $value = null): QueryBuilder
+    {
+        return $this->newQuery()->where($column, $operator, $value);
+    }
+
+    /**
+     * Inicia um JOIN fluente entre tabelas.
+     * Ex: $produto->join('categorias', 'categorias.id = produtos.categoria_id')->get();
+     */
+    public function join(string $table, string $condition, string $type = 'INNER'): QueryBuilder
+    {
+        return $this->newQuery()->join($table, $condition, $type);
+    }
+
+    /**
+     * Relacionamento 1:1 - Esta Model "Pertence A" Outra.
+     * Ex: $produto->categoria() >> belongsTo(Categoria::class, 'categoria_id')
+     */
+    protected function belongsTo(string $relatedClass, string $foreignKey, string $ownerKey = 'id'): ?object
+    {
+        $related = new $relatedClass();
+        return $related->where($ownerKey, '=', $this->$foreignKey)->first();
+    }
+
+    /**
+     * Relacionamento 1:N - Esta Model "Tem Várias" Outras.
+     * Ex: $categoria->produtos() >> hasMany(Produto::class, 'categoria_id')
+     */
+    protected function hasMany(string $relatedClass, string $foreignKey, string $localKey = 'id'): array
+    {
+        $related = new $relatedClass();
+
+        // Evita bugar buscando foreign key = null pra objetos recém instanciados sem dados salvos.
+        if ($this->$localKey === null) {
+            return [];
+        }
+
+        return $related->where($foreignKey, '=', $this->$localKey)->get();
+    }
+
+    /**
+     * Filtra os dados de entrada usando o Mass Assignment (lista $fillable).
+     */
+    protected function filterFillable(array $data): array
+    {
+        // Se a classe não definiu o $fillable, por retrocompatibilidade a gente aceita tudo. 
+        // Idealmente futuramente podemos até lançar Exception se estiver vazio para forçar as boas práticas.
+        if (empty($this->fillable)) {
+            return $data;
+        }
+
+        return array_intersect_key($data, array_flip($this->fillable));
+    }
+
+    /**
+     * Busca na Model atual por atributos `Core\Contracts\Mutator` e aplica as transformações.
+     */
+    protected function applyMutators(array $data): array
+    {
+        $reflection = new \ReflectionClass($this);
+        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+        foreach ($properties as $property) {
+            $name = $property->getName();
+
+            // Só aplica as Mutações em propriedades que estão sendo preenchidas pra ir pro banco
+            if (array_key_exists($name, $data)) {
+                $attributes = $property->getAttributes(\Core\Contracts\Mutator::class, \ReflectionAttribute::IS_INSTANCEOF);
+
+                foreach ($attributes as $attribute) {
+                    $mutator = $attribute->newInstance();
+                    $data[$name] = $mutator->mutate($name, $data[$name]);
+                }
+            }
+        }
+
+        return $data;
     }
 }

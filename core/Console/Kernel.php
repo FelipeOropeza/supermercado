@@ -44,8 +44,20 @@ class Kernel
             case 'make:middleware':
                 $this->makeMiddleware($args);
                 break;
+            case 'make:rule':
+                $this->makeRule($args);
+                break;
+            case 'make:mutator':
+                $this->makeMutator($args);
+                break;
             case 'setup:engine':
                 $this->setupEngine($args);
+                break;
+            case 'optimize':
+                $this->optimizeApp($args);
+                break;
+            case 'optimize:clear':
+                $this->clearOptimization($args);
                 break;
             default:
                 echo "Erro: Comando não reconhecido: '$command'\n";
@@ -65,8 +77,12 @@ class Kernel
         echo "  make:view <Nome>         Cria uma nova View automaticamente na extensão correta\n";
         echo "  make:migration <Nome>    Cria uma nova Migration de Banco de Dados. Ex: CreateUsersTable\n";
         echo "  make:middleware <Nome>   Cria um novo Middleware de validação. Ex: AuthMiddleware\n";
+        echo "  make:rule <Nome>         Cria um atributo de Validação customizado. Ex: CpfValido\n";
+        echo "  make:mutator <Nome>      Cria um atributo de Mutação customizado. Ex: LimpaCpf\n";
         echo "  migrate                  Gera o Banco de Dados ausente (se possível) e roda as Migrations\n";
         echo "  setup:engine <php|twig>  Muda o motor padrão do projeto e limpa views não utilizadas\n";
+        echo "  optimize                 Compila as rotas e dependências para máxima performance\n";
+        echo "  optimize:clear           Remove os arquivos de cache compilados\n";
     }
 
     private function makeMigration(array $args): void
@@ -126,8 +142,7 @@ class Kernel
                 // Verifica e cria
                 $pdoCheck->exec("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET {$dbConfig['charset']} COLLATE utf8mb4_unicode_ci;");
             }
-        }
-        catch (\PDOException $e) {
+        } catch (\PDOException $e) {
             echo "Erro Crítico de Conexão: O servidor não atendeu com essas credenciais.\n";
             echo "Detalhe: " . $e->getMessage() . "\n";
             exit(1);
@@ -177,8 +192,7 @@ class Kernel
 
         if (!$ranAny) {
             echo "Nenhuma Migration encontrada para rodar.\n";
-        }
-        else {
+        } else {
             echo "\n✅ Todas as migrations concluídas com sucesso.\n";
         }
     }
@@ -273,6 +287,44 @@ class Kernel
         $this->createFile($path, $content, "Middleware '$name'");
     }
 
+    private function makeRule(array $args): void
+    {
+        if (!isset($args[1])) {
+            echo "Erro: Forneça o nome. Ex: make:rule CpfValido\n";
+            exit(1);
+        }
+
+        $name = $args[1];
+        $dir = __DIR__ . '/../../app/Rules';
+        $path = $dir . '/' . $name . '.php';
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $content = $this->renderTemplate('rule', ['{{name}}' => $name]);
+        $this->createFile($path, $content, "Rule '$name'");
+    }
+
+    private function makeMutator(array $args): void
+    {
+        if (!isset($args[1])) {
+            echo "Erro: Forneça o nome. Ex: make:mutator LimpaCpf\n";
+            exit(1);
+        }
+
+        $name = $args[1];
+        $dir = __DIR__ . '/../../app/Mutators';
+        $path = $dir . '/' . $name . '.php';
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $content = $this->renderTemplate('mutator', ['{{name}}' => $name]);
+        $this->createFile($path, $content, "Mutator '$name'");
+    }
+
     private function setupEngine(array $args): void
     {
         if (!isset($args[1]) || !in_array($args[1], ['php', 'twig'])) {
@@ -295,11 +347,57 @@ class Kernel
                 unlink("$viewsPath/home.php");
             echo "✅ Motor da View comutado para TWIG.\n";
             echo "   (Execute 'composer require twig/twig' no terminal se ainda não instalou!).\n";
-        }
-        else {
+        } else {
             if (file_exists("$viewsPath/home.twig"))
                 unlink("$viewsPath/home.twig");
             echo "✅ Motor da View comutado para nativo PHP.\n";
+        }
+    }
+
+    private function optimizeApp(array $args): void
+    {
+        echo "Iniciando otimização (Build Step)...\n";
+
+        $routesPath = realpath(__DIR__ . '/../../routes/web.php');
+        if (!file_exists($routesPath)) {
+            echo "Erro: routes/web.php não encontrado.\n";
+            exit(1);
+        }
+
+        $router = \Core\Routing\Router::getInstance();
+        if (!$router) {
+            $router = new \Core\Routing\Router();
+        }
+
+        // Importa as rotas; o arquivo web.php espera a variável $router no escopo global
+        require_once $routesPath;
+
+        $compiler = new \Core\Routing\RouteCompiler();
+        $compiledCode = $compiler->compile($router);
+
+        $cacheDir = __DIR__ . '/../../.cache';
+        if (!is_dir($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
+        }
+
+        $cacheFile = $cacheDir . '/routes.php';
+        file_put_contents($cacheFile, $compiledCode);
+
+        echo "✅ Compilação de rotas concluída com sucesso em .cache/routes.php\n";
+        echo "✅ Dependências resolvidas \033[32msem Reflection\033[0m.\n";
+    }
+
+    private function clearOptimization(array $args): void
+    {
+        echo "Limpando cache...\n";
+        $cacheDir = __DIR__ . '/../../.cache';
+        $cacheFile = $cacheDir . '/routes.php';
+
+        if (file_exists($cacheFile)) {
+            unlink($cacheFile);
+            echo "✅ Cache de rotas removido com sucesso.\n";
+        } else {
+            echo "ℹ️ Nenhum cache encontrado para remover.\n";
         }
     }
 

@@ -40,7 +40,7 @@ class Validator
             foreach ($attributes as $attribute) {
                 // Instancia e Roda a regra de Validação (Required, Email, etc)
                 $rule = $attribute->newInstance();
-                $error = $rule->validate($name, $value);
+                $error = $rule->validate($name, $value, $inputData);
 
                 if ($error !== null) {
                     $this->errors[$name][] = $error;
@@ -49,7 +49,11 @@ class Validator
 
             // Se não deu erro, higienizamos o dado para guardar limpo
             if (!isset($this->errors[$name])) {
-                $this->data[$name] = is_string($value) ? htmlspecialchars($value, ENT_QUOTES, 'UTF-8') : $value;
+                if ($value instanceof \Core\Http\UploadedFile) {
+                    $this->data[$name] = $value;
+                } else {
+                    $this->data[$name] = is_string($value) ? htmlspecialchars($value, ENT_QUOTES, 'UTF-8') : $value;
+                }
             }
         }
 
