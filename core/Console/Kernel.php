@@ -173,7 +173,7 @@ class Kernel
 
             // Pega o nome da classe removendo timestamp e extensão
             // Ex: "2023_01_01_102030_CreateUsersTable.php" vira "CreateUsersTable"
-            $className = preg_replace('/^[0-9_]+_([a-zA-Z0-9]+)\.php$/', '$1', $file);
+            $className = preg_replace('/^[0-9_]+_([a-zA-Z0-9_]+)\.php$/', '$1', $file);
 
             if ($className && is_file($path)) {
                 require_once $path;

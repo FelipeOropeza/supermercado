@@ -12,13 +12,13 @@ use Core\Attributes\Hash;
 class User extends Model
 {
     protected $table = 'users';
-    protected array $fillable = ['nome', 'email', 'password', 'saldo'];
+    protected array $fillable = ['name', 'email', 'password', 'phone', 'role'];
 
     // Propriedades publicas mapeando as colunas da tabela "users"
     public ?int $id = null;
 
     #[Required]
-    public ?string $nome = null;
+    public ?string $name = null;
 
     #[Required]
     #[Email]
@@ -29,9 +29,10 @@ class User extends Model
     #[Hash]
     public ?string $password = null;
 
+    public ?string $phone = null;
+
     #[Required]
-    #[IsFloat(7, 2)]
-    public ?float $saldo = null;
+    public ?string $role = 'client';
 
     public ?string $created_at = null;
     public ?string $updated_at = null;
