@@ -38,6 +38,9 @@ class Kernel
             case 'make:model':
                 $this->makeModel($args);
                 break;
+            case 'make:service':
+                $this->makeService($args);
+                break;
             case 'make:view':
                 $this->makeView($args);
                 break;
@@ -52,6 +55,9 @@ class Kernel
                 break;
             case 'setup:engine':
                 $this->setupEngine($args);
+                break;
+            case 'setup:auth':
+                $this->setupAuth($args);
                 break;
             case 'optimize':
                 $this->optimizeApp($args);
@@ -75,12 +81,14 @@ class Kernel
         echo "  make:controller <Nome>   Cria um novo Controller\n";
         echo "  make:model <Nome>        Cria um novo Model\n";
         echo "  make:view <Nome>         Cria uma nova View automaticamente na extensão correta\n";
+        echo "  make:service <Nome>      Cria um novo Service de regra de negócio para injetar. Ex: UserService\n";
         echo "  make:migration <Nome>    Cria uma nova Migration de Banco de Dados. Ex: CreateUsersTable\n";
         echo "  make:middleware <Nome>   Cria um novo Middleware de validação. Ex: AuthMiddleware\n";
         echo "  make:rule <Nome>         Cria um atributo de Validação customizado. Ex: CpfValido\n";
         echo "  make:mutator <Nome>      Cria um atributo de Mutação customizado. Ex: LimpaCpf\n";
         echo "  migrate                  Gera o Banco de Dados ausente (se possível) e roda as Migrations\n";
         echo "  setup:engine <php|twig>  Muda o motor padrão do projeto e limpa views não utilizadas\n";
+        echo "  setup:auth               Instala o scaffolding completo de Autenticação (Login, Registro, DB)\n";
         echo "  optimize                 Compila as rotas e dependências para máxima performance\n";
         echo "  optimize:clear           Remove os arquivos de cache compilados\n";
     }
@@ -148,8 +156,37 @@ class Kernel
             exit(1);
         }
 
-        // Agora sim a gente roda as criações na Schema
-        // As Facades `Schema` la dentro chamarão o Connection real.
+        // Conexão com o banco de dados da aplicação para gerenciar a tabela de migrations
+        $pdoApp = null;
+        try {
+            if ($driver === 'mysql') {
+                $dsnApp = "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['database']}";
+                $pdoApp = new \PDO($dsnApp, $dbConfig['username'], $dbConfig['password']);
+                $pdoApp->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                // Criar a tabela migrations se não existir
+                $pdoApp->exec("CREATE TABLE IF NOT EXISTS `migrations` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `migration` VARCHAR(255) NOT NULL,
+                    `batch` INT NOT NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET={$dbConfig['charset']} COLLATE=utf8mb4_unicode_ci;");
+            }
+        } catch (\PDOException $e) {
+            echo "Erro Crítico ao conectar no banco de dados da aplicação.\n";
+            echo "Detalhe: " . $e->getMessage() . "\n";
+            exit(1);
+        }
+
+        // Buscar as migrations já rodadas
+        $ranMigrations = [];
+        $nextBatch = 1;
+        if ($pdoApp) {
+            $stmt = $pdoApp->query("SELECT migration FROM migrations");
+            $ranMigrations = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+            $stmtBatch = $pdoApp->query("SELECT MAX(batch) FROM migrations");
+            $nextBatch = ((int) $stmtBatch->fetchColumn()) + 1;
+        }
 
         $dir = $this->config['paths']['migrations'] ?? __DIR__ . '/../../database/migrations';
 
@@ -159,13 +196,17 @@ class Kernel
         }
 
         $files = scandir($dir);
+        // Garante a ordenação alfabética (que equivale a cronológica devido ao formato Y_m_d_His)
+        sort($files);
         $ranAny = false;
-
-        // Obs: Em um framework complexo haveria uma tabela `migrations` no BD pra não rodar duas vezes o que já rodou.
-        // Como isso é a base em desenvolvimento, vamos rodar tudo.
 
         foreach ($files as $file) {
             if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            // Se a migration já foi rodada, pular
+            if (in_array($file, $ranMigrations)) {
                 continue;
             }
 
@@ -173,17 +214,30 @@ class Kernel
 
             // Pega o nome da classe removendo timestamp e extensão
             // Ex: "2023_01_01_102030_CreateUsersTable.php" vira "CreateUsersTable"
-            $className = preg_replace('/^[0-9_]+_([a-zA-Z0-9_]+)\.php$/', '$1', $file);
+            $className = preg_replace('/^[0-9_]+_([a-zA-Z0-9]+)\.php$/', '$1', $file);
 
             if ($className && is_file($path)) {
                 require_once $path;
+
+                // Suportar classes com namespace
+                $namespacedClass = "\\App\\Database\\Migrations\\$className";
+                if (class_exists($namespacedClass)) {
+                    $className = $namespacedClass;
+                }
 
                 if (class_exists($className)) {
                     $migration = new $className();
 
                     if (method_exists($migration, 'up')) {
-                        echo "\n[INFO] Rodando: $className\n";
+                        echo "\n[INFO] Rodando: $file\n";
                         $migration->up();
+
+                        // Registra no banco
+                        if ($pdoApp) {
+                            $stmtInsert = $pdoApp->prepare("INSERT INTO migrations (migration, batch) VALUES (?, ?)");
+                            $stmtInsert->execute([$file, $nextBatch]);
+                        }
+
                         $ranAny = true;
                     }
                 }
@@ -191,7 +245,7 @@ class Kernel
         }
 
         if (!$ranAny) {
-            echo "Nenhuma Migration encontrada para rodar.\n";
+            echo "Nenhuma Migration pendente encontrada para rodar.\n";
         } else {
             echo "\n✅ Todas as migrations concluídas com sucesso.\n";
         }
@@ -231,6 +285,29 @@ class Kernel
 
         $content = $this->renderTemplate('model', ['{{name}}' => $name]);
         $this->createFile($path, $content, "Model '$name'");
+    }
+
+    private function makeService(array $args): void
+    {
+        if (!isset($args[1])) {
+            echo "Erro: Forneça o nome. Ex: make:service UsuarioService\n";
+            exit(1);
+        }
+
+        $name = $args[1];
+        if (!str_ends_with($name, 'Service')) {
+            $name .= 'Service';
+        }
+
+        $dir = $this->config['paths']['services'] ?? __DIR__ . '/../../app/Services';
+        $path = $dir . '/' . $name . '.php';
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $content = $this->renderTemplate('service', ['{{name}}' => $name]);
+        $this->createFile($path, $content, "Service '$name'");
     }
 
     private function makeView(array $args): void
@@ -372,6 +449,10 @@ class Kernel
         // Importa as rotas; o arquivo web.php espera a variável $router no escopo global
         require_once $routesPath;
 
+        // Escaneia a pasta app/Controllers buscando attributes
+        $scanner = new \Core\Routing\AttributeRouteScanner();
+        $scanner->scan($router, realpath(__DIR__ . '/../../app/Controllers'), 'App\\Controllers\\');
+
         $compiler = new \Core\Routing\RouteCompiler();
         $compiledCode = $compiler->compile($router);
 
@@ -399,6 +480,132 @@ class Kernel
         } else {
             echo "ℹ️ Nenhum cache encontrado para remover.\n";
         }
+    }
+
+    private function setupAuth(array $args): void
+    {
+        echo "Iniciando o Scaffold de Autenticação MVC...\n========================================\n";
+
+        $baseDir = realpath(__DIR__ . '/../../');
+        $authTemplatesDir = __DIR__ . '/Templates/auth';
+
+        // 1. Controller
+        $controllerDir = $this->config['paths']['controllers'] ?? $baseDir . '/app/Controllers';
+        if (!is_dir($controllerDir)) mkdir($controllerDir, 0777, true);
+
+        $controllerPath = $controllerDir . '/AuthController.php';
+        if (!file_exists($controllerPath)) {
+            $code = file_get_contents("$authTemplatesDir/controller.stub");
+            file_put_contents($controllerPath, $code);
+            echo "✅ Controller: AuthController criado.\n";
+        }
+
+        // 2. DTOs
+        $dtoDir = $baseDir . '/app/DTOs/Auth';
+        if (!is_dir($dtoDir)) mkdir($dtoDir, 0777, true);
+
+        $loginDtoPath = $dtoDir . '/LoginDTO.php';
+        if (!file_exists($loginDtoPath)) {
+            $code = file_get_contents("$authTemplatesDir/login_dto.stub");
+            file_put_contents($loginDtoPath, $code);
+            echo "✅ DTO: LoginDTO criado.\n";
+        }
+
+        $registerDtoPath = $dtoDir . '/RegisterDTO.php';
+        if (!file_exists($registerDtoPath)) {
+            $code = file_get_contents("$authTemplatesDir/register_dto.stub");
+            file_put_contents($registerDtoPath, $code);
+            echo "✅ DTO: RegisterDTO criado.\n";
+        }
+
+        // 2.5 Service
+        $serviceDir = $this->config['paths']['services'] ?? $baseDir . '/app/Services';
+        if (!is_dir($serviceDir)) mkdir($serviceDir, 0777, true);
+
+        $authServicePath = $serviceDir . '/AuthService.php';
+        if (!file_exists($authServicePath)) {
+            $code = file_get_contents("$authTemplatesDir/auth_service.stub");
+            file_put_contents($authServicePath, $code);
+            echo "✅ Service: AuthService criado.\n";
+        }
+
+        // 3. Model
+        $modelDir = $this->config['paths']['models'] ?? $baseDir . '/app/Models';
+        if (!is_dir($modelDir)) mkdir($modelDir, 0777, true);
+
+        $modelPath = $modelDir . '/Usuario.php';
+        if (!file_exists($modelPath)) {
+            $code = file_get_contents("$authTemplatesDir/usuario_model.stub");
+            file_put_contents($modelPath, $code);
+            echo "✅ Model: Usuario criado.\n";
+        }
+
+        // 4. Migration
+        $migrationDir = $this->config['paths']['migrations'] ?? $baseDir . '/database/migrations';
+        if (!is_dir($migrationDir)) mkdir($migrationDir, 0777, true);
+
+        $existing = glob($migrationDir . '/*_CreateUsuariosTable.php');
+        if (empty($existing)) {
+            $fileName = date('Y_m_d_His') . '_CreateUsuariosTable.php';
+            $migrationPath = $migrationDir . '/' . $fileName;
+            $code = file_get_contents("$authTemplatesDir/migration.stub");
+            file_put_contents($migrationPath, $code);
+            echo "✅ Migration: Tabela de 'usuarios' criada.\n";
+        }
+
+        // 5. Views
+        $viewDir = $this->config['paths']['views'] ?? $baseDir . '/resources/views';
+        $authViewDir = $viewDir . '/auth';
+        if (!is_dir($authViewDir)) mkdir($authViewDir, 0777, true);
+
+        $engine = $this->config['app']['view_engine'] ?? 'php';
+        $ext = $engine === 'twig' ? '.twig' : '.php';
+
+        $loginViewPath = $authViewDir . '/login' . $ext;
+        if (!file_exists($loginViewPath)) {
+            $code = file_get_contents("$authTemplatesDir/login{$ext}.stub");
+            file_put_contents($loginViewPath, $code);
+            echo "✅ View: Formulário de Login criado.\n";
+        }
+
+        $registerViewPath = $authViewDir . '/register' . $ext;
+        if (!file_exists($registerViewPath)) {
+            $code = file_get_contents("$authTemplatesDir/register{$ext}.stub");
+            file_put_contents($registerViewPath, $code);
+            echo "✅ View: Formulário de Registro criado.\n";
+        }
+
+        // Dashboard View
+        $dashboardViewPath = $viewDir . '/dashboard' . $ext;
+        if (!file_exists($dashboardViewPath)) {
+            $code = file_get_contents("$authTemplatesDir/dashboard{$ext}.stub");
+            file_put_contents($dashboardViewPath, $code);
+            echo "✅ View: Área Restrita (Dashboard) criada.\n";
+        }
+
+        // 6. Routes
+        $routesPath = $baseDir . '/routes/web.php';
+        $authRoutesPath = $baseDir . '/routes/auth.php';
+
+        if (!file_exists($authRoutesPath)) {
+            $code = file_get_contents("$authTemplatesDir/routes.stub");
+            file_put_contents($authRoutesPath, $code);
+            echo "✅ Rotas: Arquivo auth.php criado em routes/auth.php.\n";
+
+            // Requer o arquivo no web.php se ainda não estiver
+            if (file_exists($routesPath)) {
+                $routesContent = file_get_contents($routesPath);
+                if (strpos($routesContent, "'auth.php'") === false && strpos($routesContent, '"auth.php"') === false) {
+                    $requireSnippet = "\n\n// Inclui Rotas de Autenticação Auxiliares\nrequire_once __DIR__ . '/auth.php';\n";
+                    file_put_contents($routesPath, $routesContent . $requireSnippet);
+                    echo "✅ Rotas: routes/auth.php incluído automaticamente no seu routes/web.php!\n";
+                }
+            }
+        } else {
+            echo "ℹ️ O arquivo de rotas auth.php já existe.\n";
+        }
+
+        echo "\n🎉 Setup Auth concluído! Execute \033[32mphp forge migrate\033[0m para gerar o banco e acesse \033[36m/login\033[0m.\n";
     }
 
     private function renderTemplate(string $templateName, array $replacements): string

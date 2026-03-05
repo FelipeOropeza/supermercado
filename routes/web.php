@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\HomeController;
+use Core\Routing\Route;
 
 /** @var \Core\Routing\Router $router */
 
@@ -8,4 +9,6 @@ use App\Controllers\HomeController;
 // ROTAS DE APLICAÇÃO (WEB / HTML)
 // ==========================================
 
-$router->get('/home', [HomeController::class , 'index']);
+// A Rota /home não está mais aqui, ela foi movida para atributos no HomeController!
+
+Route::get('/', [HomeController::class, 'index']);

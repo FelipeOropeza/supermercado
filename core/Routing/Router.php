@@ -36,6 +36,13 @@ class Router
         return $this->routes;
     }
 
+
+    public function setRoutes(array $routes): self
+    {
+        $this->routes = $routes;
+        return $this;
+    }
+
     public function get(string $uri, array|Closure|callable $action): self
     {
         return $this->register('GET', $uri, $action);
@@ -54,6 +61,11 @@ class Router
     public function delete(string $uri, array|Closure|callable $action): self
     {
         return $this->register('DELETE', $uri, $action);
+    }
+
+    public function patch(string $uri, array|Closure|callable $action): self
+    {
+        return $this->register('PATCH', $uri, $action);
     }
 
     public function group(array $attributes, Closure $callback): void
@@ -194,6 +206,8 @@ class Router
 
     public function dispatch(\Core\Http\Request $request): \Core\Http\Response
     {
+        $container = \Core\Support\Container::getInstance();
+
         $uri = parse_url($request->server['REQUEST_URI'] ?? '/', PHP_URL_PATH);
         $method = $request->server['REQUEST_METHOD'] ?? 'GET';
 
@@ -210,7 +224,6 @@ class Router
 
         // Lógica Global de Redirecionamento da Rota Raiz (Lida da Configuração)
         if ($uri === '/') {
-            $container = \Core\Support\Container::getInstance();
             $config = $container->has('config') ? $container->get('config') : require __DIR__ . '/../../config/app.php';
             $defaultRoute = $config['app']['default_route'] ?? '/';
 
@@ -222,9 +235,7 @@ class Router
         $matchedRouteInfos = null;
         $params = [];
 
-        // Verifica cache de rotas compiladas
-        $cacheFile = __DIR__ . '/../../.cache/routes.php';
-        $routesToSearch = file_exists($cacheFile) ? require $cacheFile : $this->routes;
+        $routesToSearch = $this->routes;
 
         if (isset($routesToSearch[$method])) {
             // Tenta mapa direto de hash caso a URI não use variável (Fast O(1) lookup)
@@ -256,9 +267,7 @@ class Router
 
             // Vamos construir a destinação final (O Action/Controller sendo invocado)
             // Esse é o centro absoluto da cebola
-            $destination = function (\Core\Http\Request $request) use ($action, $params) {
-                $container = \Core\Support\Container::getInstance();
-
+            $destination = function (\Core\Http\Request $request) use ($action, $params, $container) {
                 // 1. Otimização em Cache: Se tiver 'factory', é uma Action Compilada pre-resolvida sem reflexion
                 if (is_array($action) && isset($action['factory']) && is_callable($action['factory'])) {
                     $controllerInstance = $action['factory']();
@@ -278,13 +287,29 @@ class Router
 
             // A Requisição `$request` já foi passada instanciada pelo Kernel e Injetada no Dispatch
             // Apenas garantimos de cadastrá-la no Container pra todo o framework poder Injetá-la
-            \Core\Support\Container::getInstance()->instance(\Core\Http\Request::class, $request);
+            $container->instance(\Core\Http\Request::class, $request);
+
+            // Resolve Middlewares usando Aliases do config/middleware.php
+            $config = $container->has('config') ? $container->get('config') : [];
+            $aliases = $config['middleware']['aliases'] ?? [];
+            $groups = $config['middleware']['groups'] ?? [];
+
+            $resolvedMiddlewares = [];
+            foreach ($routeMiddlewares as $middleware) {
+                if (isset($groups[$middleware])) {
+                    foreach ($groups[$middleware] as $groupMiddleware) {
+                        $resolvedMiddlewares[] = $aliases[$groupMiddleware] ?? $groupMiddleware;
+                    }
+                } else {
+                    $resolvedMiddlewares[] = $aliases[$middleware] ?? $middleware;
+                }
+            }
 
             // Criamos e executamos a Pipeline de Middlewares injetando no fim o Destination (Action)
             $pipeline = new \Core\Http\Pipeline();
             $result = $pipeline
                 ->send($request)
-                ->through($routeMiddlewares)
+                ->through($resolvedMiddlewares)
                 ->then($destination);
 
             // Garante que o retorno seja sempre um objeto Core\Http\Response

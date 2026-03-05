@@ -40,7 +40,7 @@ class Blueprint
 
     public function decimal(string $name, int $precision = 8, int $scale = 2): ColumnDefinition
     {
-        return $this->addColumn($name, 'DECIMAL', "$precision,$scale");
+        return $this->addColumn($name, 'DECIMAL', (string)$precision . ',' . (string)$scale);
     }
 
     public function boolean(string $name): ColumnDefinition

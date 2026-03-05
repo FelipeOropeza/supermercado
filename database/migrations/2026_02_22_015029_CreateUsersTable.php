@@ -3,18 +3,18 @@
 use Core\Database\Schema\Schema;
 use Core\Database\Schema\Blueprint;
 
-class create_categories_table
+class CreateUsersTable
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
+            $table->string('nome');
+            $table->string('email');
+            $table->string('password');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ class create_categories_table
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('users');
     }
 }
