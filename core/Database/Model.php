@@ -6,6 +6,7 @@ namespace Core\Database;
 
 use PDO;
 
+#[\AllowDynamicProperties]
 abstract class Model
 {
     /** @var PDO */
