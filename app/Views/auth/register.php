@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Aplicação</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm my-8">
@@ -24,7 +26,19 @@
                 <input class="shadow appearance-none border <?= errors('email') ? 'border-red-500' : '' ?> rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" name="email" value="<?= htmlspecialchars(old('email')) ?>" required>
                 <?php if ($error = errors('email')): ?><p class="text-red-500 text-xs italic mt-1"><?= $error ?></p><?php endif; ?>
             </div>
-            
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="cpf">CPF (Opcional)</label>
+                <input class="shadow appearance-none border <?= errors('cpf') ? 'border-red-500' : '' ?> rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="cpf" type="text" name="cpf" value="<?= htmlspecialchars(old('cpf')) ?>">
+                <?php if ($error = errors('cpf')): ?><p class="text-red-500 text-xs italic mt-1"><?= $error ?></p><?php endif; ?>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="telefone">Telefone (Opcional)</label>
+                <input class="shadow appearance-none border <?= errors('telefone') ? 'border-red-500' : '' ?> rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="telefone" type="text" name="telefone" value="<?= htmlspecialchars(old('telefone')) ?>">
+                <?php if ($error = errors('telefone')): ?><p class="text-red-500 text-xs italic mt-1"><?= $error ?></p><?php endif; ?>
+            </div>
+
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="senha">Senha</label>
                 <input class="shadow appearance-none border <?= errors('senha') ? 'border-red-500' : '' ?> rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="senha" type="password" name="senha" required>
@@ -36,7 +50,7 @@
                 <input class="shadow appearance-none border <?= errors('senha_confirmacao') ? 'border-red-500' : '' ?> rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="senha_confirmacao" type="password" name="senha_confirmacao" required>
                 <?php if ($error = errors('senha_confirmacao')): ?><p class="text-red-500 text-xs italic mt-1"><?= $error ?></p><?php endif; ?>
             </div>
-            
+
             <div class="flex items-center justify-between">
                 <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
                     Registrar
@@ -49,4 +63,5 @@
     </div>
 
 </body>
+
 </html>

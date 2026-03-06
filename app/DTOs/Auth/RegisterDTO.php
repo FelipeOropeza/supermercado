@@ -22,4 +22,8 @@ class RegisterDTO extends DataTransferObject
 
     #[Required(message: 'A confirmação de senha é obrigatória.')]
     public string $senha_confirmacao;
+
+    public ?string $cpf = null;
+
+    public ?string $telefone = null;
 }

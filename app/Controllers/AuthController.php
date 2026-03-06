@@ -29,7 +29,12 @@ class AuthController
         $usuario = $this->authService->login($dto);
 
         // Armazena na sessão
-        session()->set('user', ['id' => $usuario->id, 'nome' => $usuario->nome, 'email' => $usuario->email]);
+        session()->set('user', [
+            'id' => $usuario->id,
+            'nome' => $usuario->nome,
+            'email' => $usuario->email,
+            'role' => $usuario->role ?? 'cliente'
+        ]);
 
         return Response::makeRedirect('/dashboard');
     }
@@ -43,7 +48,12 @@ class AuthController
     {
         $usuario = $this->authService->registrar($dto);
 
-        session()->set('user', ['id' => $usuario->id, 'nome' => $usuario->nome, 'email' => $usuario->email]);
+        session()->set('user', [
+            'id' => $usuario->id,
+            'nome' => $usuario->nome,
+            'email' => $usuario->email,
+            'role' => $usuario->role ?? 'cliente'
+        ]);
 
         return Response::makeRedirect('/dashboard');
     }

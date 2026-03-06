@@ -39,7 +39,10 @@ class AuthService
 
         $data = $dto->toArray();
         unset($data['senha_confirmacao']);
-        
+
+        $data['cpf'] = !empty($data['cpf']) ? $data['cpf'] : null;
+        $data['telefone'] = !empty($data['telefone']) ? $data['telefone'] : null;
+
         $data['senha'] = password_hash($data['senha'], PASSWORD_DEFAULT);
         $id = $this->usuarioModel->insert($data);
 
