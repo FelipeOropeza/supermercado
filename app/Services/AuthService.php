@@ -28,11 +28,6 @@ class AuthService
 
     public function registrar(RegisterDTO $dto): object
     {
-        // Validação adicional de confirmação de senha
-        if ($dto->senha !== $dto->senha_confirmacao) {
-            fail_validation(['senha_confirmacao' => 'A confirmação de senha não coincide.']);
-        }
-
         if ($this->usuarioModel->where('email', '=', $dto->email)->first()) {
             fail_validation(['email' => 'Este e-mail já está em uso.']);
         }
@@ -43,7 +38,6 @@ class AuthService
         $data['cpf'] = !empty($data['cpf']) ? $data['cpf'] : null;
         $data['telefone'] = !empty($data['telefone']) ? $data['telefone'] : null;
 
-        $data['senha'] = password_hash($data['senha'], PASSWORD_DEFAULT);
         $id = $this->usuarioModel->insert($data);
 
         return (object)[

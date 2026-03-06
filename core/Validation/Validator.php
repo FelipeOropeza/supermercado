@@ -47,6 +47,13 @@ class Validator
                 }
             }
 
+            // Aplicar Mutators se houver (Hash, Trim, etc.)
+            $mutatorAttributes = $property->getAttributes(\Core\Contracts\Mutator::class, \ReflectionAttribute::IS_INSTANCEOF);
+            foreach ($mutatorAttributes as $mAttribute) {
+                $mutator = $mAttribute->newInstance();
+                $value = $mutator->mutate($name, $value);
+            }
+
             // Se não deu erro, higienizamos o dado para guardar limpo
             if (!isset($this->errors[$name])) {
                 if ($value instanceof \Core\Http\UploadedFile) {

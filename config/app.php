@@ -33,7 +33,7 @@ return [
         // Motores suportados: 'php' ou 'twig'
         'view_engine' => 'php',
         // Rota padrão do redirecionamento raiz, caso configurado
-        'default_route' => function_exists('env') ? env('APP_DEFAULT_ROUTE', '/') : '/',
+        'default_route' => getenv('APP_DEFAULT_ROUTE') ?: '/',
     ],
 
     /*
