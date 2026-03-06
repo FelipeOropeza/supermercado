@@ -1,177 +1,193 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> <?= $title ?? 'Bem-vindo ao MVC Framework' ?> </title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
+    <title><?= htmlspecialchars($title ?? 'Supermercado Online') ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-        }
-
-        .welcome-card {
-            background: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            padding: 2.5rem 2rem;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .icon-container {
-            width: 64px;
-            height: 64px;
-            background: rgba(79, 70, 229, 0.1);
-            color: #4f46e5;
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 1.25rem;
-        }
-
-        h1 {
-            font-weight: 800;
-            color: #0f172a;
-            letter-spacing: -0.5px;
-            font-size: 1.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        p {
-            color: #64748b;
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
-        }
-
-        .code-block {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            font-family: monospace;
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .btn-custom {
-            background-color: #4f46e5;
-            color: white;
-            font-weight: 600;
-            padding: 0.75rem 1.75rem;
-            border-radius: 9999px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-custom:hover {
-            background-color: #4338ca;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            color: #4f46e5;
-            border: 2px solid #4f46e5;
-            padding: 0.75rem 1.75rem;
-        }
-
-        .btn-outline:hover {
-            background-color: rgba(79, 70, 229, 0.05);
-            color: #4f46e5;
-            box-shadow: none;
-        }
-
-        .version {
-            margin-top: 2rem;
-            font-size: 0.85rem;
-            color: #94a3b8;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-gray-50 flex flex-col min-h-screen">
 
-    <div class="welcome-card">
-        <div class="icon-container">
-            <i class="bi bi-box-seam"></i>
-        </div>
+    <!-- Navbar -->
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo e Links em Detalhe -->
+                <div class="flex items-center">
+                    <a href="/" class="flex-shrink-0 flex items-center gap-2">
+                        <span class="text-2xl">🛒</span>
+                        <span class="font-bold text-xl text-green-700 tracking-tight">Supermercado</span>
+                    </a>
 
-        <h1> <?= $title ?? 'Bem-vindo ao MVC!' ?> </h1>
+                    <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+                        <a href="/" class="border-green-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Promoções (Folheto)
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Produtos
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Categorias
+                        </a>
+                    </div>
+                </div>
 
-        <p>
-            Você instalou o seu esqueleto PHP com sucesso. Comece construindo algo incrível utilizando rotas expressivas,
-            validação limpa e a velocidade que você merece.
-        </p>
+                <!-- Lado Direito: Ações / Login -->
+                <div class="flex items-center space-x-4">
+                    <!-- Carrinho Ícone com Badge (Mock) -->
+                    <a href="#" class="relative p-2 text-gray-600 hover:text-green-600 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">0</span>
+                    </a>
 
-        <?php if (isset($name)): ?>
-            <div class="alert alert-success bg-success bg-opacity-10 border-0 text-success fw-medium mb-4">
-                Olá, <?= htmlspecialchars($name) ?>! Os dados do Controller estão chegando com sucesso.
+                    <!-- Autenticação Dinâmica -->
+                    <?php if (session()->has('user')): ?>
+                        <div class="hidden sm:flex items-center space-x-3 border-l pl-4 border-gray-200">
+                            <div class="text-sm font-medium text-gray-700">
+                                Olá, <?= htmlspecialchars(session('user')['nome']) ?>
+                            </div>
+                            <a href="/dashboard" class="text-sm text-green-600 hover:text-green-800 font-semibold underline underline-offset-2">Minha Conta</a>
+                        </div>
+                    <?php else: ?>
+                        <div class="hidden sm:flex items-center space-x-2">
+                            <a href="/login" class="text-gray-600 hover:text-green-600 px-3 py-2 text-sm font-medium transition">Entrar</a>
+                            <a href="/register" class="bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">Cadastre-se</a>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        <?php endif; ?>
+        </div>
+    </nav>
 
-        <?php if (isset($status) && $status === true): ?>
-            <div class="alert alert-info bg-info bg-opacity-10 border-0 text-info fw-medium mb-4">
-                <i class="bi bi-magic pe-2"></i><strong>Injeção de Dependências</strong> funcionando perfeitamente via Service Layer!
+    <!-- Banner Principal -->
+    <div class="bg-green-600 flex-grow-0">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:p-16 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between">
+            <div class="w-full sm:w-1/2">
+                <h1 class="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl tracking-tight mb-4">
+                    O Seu Folheto <br>
+                    <span class="text-green-200">100% Digital</span>
+                </h1>
+                <p class="mt-3 text-base text-green-100 sm:text-lg md:mt-5 md:max-w-xl">
+                    Precisa das compras do mês mas está sem tempo? Navegue, adicione ao carrinho e nós levamos na sua porta. Promoções exclusivas toda semana!
+                </p>
+                <div class="mt-8 flex justify-center sm:justify-start gap-3">
+                    <a href="#folheto" class="px-8 py-3 bg-white text-green-700 font-bold rounded-full shadow-lg hover:bg-gray-100 transition inline-flex items-center gap-2">
+                        Ver Ofertas
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </a>
+                </div>
             </div>
-        <?php endif; ?>
 
-        <div class="code-block">
-            Para começar, edite este arquivo em:<br>
-            <strong class="text-primary">app/Views/home.php</strong>
-        </div>
-
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="https://github.com/FelipeOropeza/mvc-estrutura" target="_blank" class="btn-custom">
-                <i class="bi bi-github"></i> Código Fonte
-            </a>
-            <a href="#" class="btn-custom btn-outline">
-                <i class="bi bi-book"></i> Documentação
-            </a>
-        </div>
-
-        <div class="version">
-            MVC Framework v1.0.0 &bull; Baseado em PHP >= 8.2
+            <div class="hidden sm:flex w-full sm:w-1/3 justify-center">
+                <div class="text-9xl transform rotate-12 drop-shadow-2xl">🛍️</div>
+            </div>
         </div>
     </div>
 
+    <!-- Seção: Produtos (Mockup Inicial) -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
+        <h2 id="folheto" class="text-2xl font-bold flex items-center gap-2 text-gray-800 mb-8 border-b pb-4">
+            🔥 Ofertas em Destaque
+        </h2>
+
+        <!-- Grid de Produtos Mockados -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+            <!-- Card 1 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
+                <div class="h-48 bg-gray-200 flex items-center justify-center text-5xl">🍎</div>
+                <div class="p-5">
+                    <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">Hortifruti</div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Maçã Fuji Nacional</h3>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-gray-400 line-through text-sm">R$ 9,99/kg</span>
+                        <span class="text-2xl font-extrabold text-red-600">R$ 7,50</span>
+                    </div>
+                    <?php if (!session()->has('user')): ?>
+                        <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
+                            Faça login para comprar
+                        </a>
+                    <?php else: ?>
+                        <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                            <span>Adicionar</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
+                <div class="h-48 bg-gray-200 flex items-center justify-center text-5xl">🥩</div>
+                <div class="p-5">
+                    <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">Açougue</div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Picanha Bovina Fatiada</h3>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-gray-400 line-through text-sm">R$ 89,90/kg</span>
+                        <span class="text-2xl font-extrabold text-red-600">R$ 65,99</span>
+                    </div>
+                    <?php if (!session()->has('user')): ?>
+                        <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
+                            Faça login para comprar
+                        </a>
+                    <?php else: ?>
+                        <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                            <span>Adicionar</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
+                <div class="h-48 bg-gray-200 flex items-center justify-center text-5xl">🍞</div>
+                <div class="p-5">
+                    <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">Padaria</div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Pão Francês Quentinho</h3>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl font-extrabold text-gray-900">R$ 15,90<span class="text-base font-normal text-gray-500">/kg</span></span>
+                    </div>
+                    <?php if (!session()->has('user')): ?>
+                        <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
+                            Faça login para comprar
+                        </a>
+                    <?php else: ?>
+                        <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                            <span>Adicionar</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            &copy; 2026 E-commerce Supermercado. Todos os direitos reservados.
+        </div>
+    </footer>
 </body>
 
 </html>
