@@ -38,7 +38,7 @@
                         <div class="text-sm font-medium text-gray-700">
                             Olá, <?= htmlspecialchars(session('user')['nome']) ?>
                         </div>
-                        <a href="/dashboard" class="text-sm text-green-600 hover:text-green-800 font-semibold underline underline-offset-2">Minha Conta</a>
+                        <a href="/minha-conta" class="text-sm text-green-600 hover:text-green-800 font-semibold underline underline-offset-2">Minha Conta</a>
                     </div>
                 <?php else: ?>
                     <div class="hidden sm:flex items-center space-x-2">

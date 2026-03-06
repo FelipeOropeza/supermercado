@@ -19,8 +19,8 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 **Foco:** Garantir que tenhamos quem use o sistema (Clientes e Administradores) de forma segura.
 - [x] Implementar as telas e lógicas de Login e Cadastro de Usuário (`AuthController`).
 - [x] Criar/Ajustar um **Middleware** capaz de verificar se o usuário logado possui a *role* `admin` ou `cliente` para bloquear acessos não autorizados.
-- [ ] Painel do Usuário Logado ("Minha Conta").
-- [ ] CRUD (Criar, Editar, Listar e Excluir) da tabela `enderecos` dentro do painel do cliente, suportando múltiplos endereços.
+- [x] Painel do Usuário Logado ("Minha Conta").
+- [x] CRUD (Criar, Editar, Listar e Excluir) da tabela `enderecos` dentro do painel do cliente, suportando múltiplos endereços.
 
 ---
 

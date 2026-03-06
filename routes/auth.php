@@ -11,6 +11,14 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function() {
-    return view('dashboard');
-})->name('dashboard')->middleware(\App\Middleware\AuthMiddleware::class);
+Route::get('/minha-conta', [\App\Controllers\MinhaContaController::class, 'index'])
+    ->name('minha-conta')
+    ->middleware(\App\Middleware\AuthMiddleware::class);
+
+Route::get('/minha-conta/enderecos/novo', [\App\Controllers\MinhaContaController::class, 'createEndereco'])
+    ->name('enderecos.create')
+    ->middleware(\App\Middleware\AuthMiddleware::class);
+
+Route::post('/minha-conta/enderecos/novo', [\App\Controllers\MinhaContaController::class, 'storeEndereco'])
+    ->name('enderecos.store')
+    ->middleware(\App\Middleware\AuthMiddleware::class);
