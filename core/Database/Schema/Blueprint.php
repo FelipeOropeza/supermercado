@@ -59,6 +59,21 @@ class Blueprint
         $this->timestamp('updated_at')->nullable();
     }
 
+    public function date(string $name): ColumnDefinition
+    {
+        return $this->addColumn($name, 'DATE');
+    }
+
+    public function datetime(string $name): ColumnDefinition
+    {
+        return $this->addColumn($name, 'DATETIME');
+    }
+
+    public function softDeletes(): void
+    {
+        $this->timestamp('deleted_at')->nullable();
+    }
+
     protected function addColumn(string $name, string $type, ?string $length = null): ColumnDefinition
     {
         $column = new ColumnDefinition($name, $type, $length);

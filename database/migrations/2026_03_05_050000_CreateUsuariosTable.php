@@ -1,25 +1,29 @@
 <?php
 
+namespace App\Database\Migrations;
+
+use Core\Database\Schema\Schema;
+use Core\Database\Schema\Blueprint;
+
 class CreateUsuariosTable
 {
-    public function up()
+    public function up(): void
     {
-        $db = \Core\Database\Connection::getInstance();
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                nome VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL UNIQUE,
-                senha VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        ");
+        Schema::create('usuarios', function (Blueprint $table) {
+            $table->id();
+            $table->string('nome');
+            $table->string('email')->unique();
+            $table->string('senha');
+            $table->string('cpf', 14)->nullable()->unique();
+            $table->string('telefone', 20)->nullable();
+            $table->string('role', 20)->default('cliente');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public function down()
+    public function down(): void
     {
-        $db = \Core\Database\Connection::getInstance();
-        $db->exec("DROP TABLE IF EXISTS usuarios");
+        Schema::dropIfExists('usuarios');
     }
 }
