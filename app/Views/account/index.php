@@ -30,14 +30,6 @@
                     </svg>
                     Meus Pedidos
                 </a>
-                <form action="/logout" method="POST" class="mt-2 text-center w-full">
-                    <button type="submit" class="text-red-600 hover:bg-red-50 font-medium flex items-center px-4 py-3 rounded-xl transition w-full">
-                        <svg class="mr-3 h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Sair da Conta
-                    </button>
-                </form>
             </nav>
         </div>
 
@@ -85,9 +77,23 @@
                                             <p class="text-xs mt-1 text-gray-500 bg-gray-100 rounded px-2 py-1 inline-block">Ref: <?= htmlspecialchars($endereco->complemento) ?></p>
                                         <?php endif; ?>
                                     </div>
-                                    <div class="mt-4 flex gap-3 text-sm">
-                                        <a href="#" class="text-green-600 font-medium hover:underline">Editar</a>
-                                        <a href="#" class="text-red-500 font-medium hover:underline">Excluir</a>
+                                    <div class="mt-4 flex gap-4 text-sm">
+                                        <a href="<?= route('enderecos.edit', ['id' => $endereco->id]) ?>" class="text-green-600 font-bold hover:text-green-800 flex items-center gap-1 transition">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Editar
+                                        </a>
+
+                                        <form action="<?= route('enderecos.delete', ['id' => $endereco->id]) ?>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este endereço?');" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="text-red-500 font-bold hover:text-red-700 flex items-center gap-1 transition">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Excluir
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             <?php endforeach; ?>

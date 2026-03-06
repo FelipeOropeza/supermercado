@@ -1,7 +1,8 @@
 <?php
 
-use Core\Routing\Route;
+use App\Controllers\UsuarioController;
 use App\Controllers\AuthController;
+use Core\Routing\Route;
 
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -11,14 +12,12 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/minha-conta', [\App\Controllers\MinhaContaController::class, 'index'])
-    ->name('minha-conta')
-    ->middleware(\App\Middleware\AuthMiddleware::class);
-
-Route::get('/minha-conta/enderecos/novo', [\App\Controllers\MinhaContaController::class, 'createEndereco'])
-    ->name('enderecos.create')
-    ->middleware(\App\Middleware\AuthMiddleware::class);
-
-Route::post('/minha-conta/enderecos/novo', [\App\Controllers\MinhaContaController::class, 'storeEndereco'])
-    ->name('enderecos.store')
-    ->middleware(\App\Middleware\AuthMiddleware::class);
+// Rotas protegidas do Usuário
+Route::group(['prefix' => '/minha-conta', 'middleware' => 'auth'], function () {
+    Route::get('/', [UsuarioController::class, 'profile'])->name('minha-conta');
+    Route::get('/enderecos/novo', [UsuarioController::class, 'createEndereco'])->name('enderecos.create');
+    Route::post('/enderecos/novo', [UsuarioController::class, 'storeEndereco'])->name('enderecos.store');
+    Route::get('/enderecos/editar/{id}', [UsuarioController::class, 'editEndereco'])->name('enderecos.edit');
+    Route::post('/enderecos/editar/{id}', [UsuarioController::class, 'updateEndereco'])->name('enderecos.update');
+    Route::post('/enderecos/excluir/{id}', [UsuarioController::class, 'deleteEndereco'])->name('enderecos.delete');
+});

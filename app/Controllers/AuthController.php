@@ -36,7 +36,7 @@ class AuthController
             'role' => $usuario->role ?? 'cliente'
         ]);
 
-        return Response::makeRedirect('/dashboard');
+        return Response::makeRedirect('/');
     }
 
     public function registerForm()
@@ -55,7 +55,7 @@ class AuthController
             'role' => $usuario->role ?? 'cliente'
         ]);
 
-        return Response::makeRedirect('/dashboard');
+        return Response::makeRedirect('/');
     }
 
     public function logout()

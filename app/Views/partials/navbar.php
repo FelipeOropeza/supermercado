@@ -34,11 +34,24 @@
 
                 <!-- Autenticação Dinâmica -->
                 <?php if (session()->has('user')): ?>
-                    <div class="hidden sm:flex items-center space-x-3 border-l pl-4 border-gray-200">
-                        <div class="text-sm font-medium text-gray-700">
-                            Olá, <?= htmlspecialchars(session('user')['nome']) ?>
+                    <div class="hidden sm:flex items-center space-x-6 border-l pl-6 border-gray-200">
+                        <div class="flex flex-col items-end">
+                            <span class="text-xs text-gray-400 capitalize"><?= htmlspecialchars(session('user')['role'] ?? 'Cliente') ?></span>
+                            <span class="text-sm font-bold text-gray-700">Olá, <?= htmlspecialchars(explode(' ', session('user')['nome'])[0]) ?></span>
                         </div>
-                        <a href="/minha-conta" class="text-sm text-green-600 hover:text-green-800 font-semibold underline underline-offset-2">Minha Conta</a>
+
+                        <div class="flex items-center gap-4">
+                            <a href="<?= route('minha-conta') ?>" class="text-sm text-green-600 hover:text-green-800 font-semibold transition">Minha Conta</a>
+
+                            <form action="<?= route('logout') ?>" method="POST" class="inline">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-full transition title=" Sair">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 <?php else: ?>
                     <div class="hidden sm:flex items-center space-x-2">
