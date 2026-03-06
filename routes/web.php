@@ -9,10 +9,5 @@ use Core\Routing\Route;
 // ROTAS DE APLICAÇÃO (WEB / HTML)
 // ==========================================
 
-// A Rota /home não está mais aqui, ela foi movida para atributos no HomeController!
-
-Route::get('/', [HomeController::class, 'index']);
-
-
 // Inclui Rotas de Autenticação Auxiliares
 require_once __DIR__ . '/auth.php';
