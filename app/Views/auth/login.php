@@ -1,44 +1,49 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Aplicação</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<?php $this->layout('layouts/main', ['title' => 'Entrar | Supermercado']); ?>
 
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Acesse sua conta</h2>
-        
+<?php $this->section('content'); ?>
+<main class="flex-grow flex items-center justify-center px-4 py-12 bg-gray-50">
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-full max-w-md">
+
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">Bem-vindo de volta!</h2>
+            <p class="text-gray-500 text-sm mt-2">Acesse sua conta para continuar suas compras.</p>
+        </div>
+
         <?php if ($error = errors('email')): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-sm" role="alert">
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6 text-sm" role="alert">
                 <?= htmlspecialchars($error) ?>
             </div>
         <?php endif; ?>
 
-        <form action="/login" method="POST">
+        <form action="/login" method="POST" class="space-y-5">
             <?= csrf_field() ?? '' ?>
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">E-mail</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" name="email" value="<?= htmlspecialchars(old('email')) ?>" required>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-2" for="email">E-mail</label>
+                <div class="relative">
+                    <input class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" id="email" type="email" name="email" value="<?= htmlspecialchars(old('email')) ?>" placeholder="Seu email cadastrado" required>
+                </div>
             </div>
-            
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="senha">Senha</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="senha" type="password" name="senha" required>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-2" for="senha">Senha</label>
+                <div class="relative">
+                    <input class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" id="senha" type="password" name="senha" placeholder="Sua senha secreta" required>
+                </div>
             </div>
-            
-            <div class="flex items-center justify-between">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
-                    Entrar
+
+            <div class="pt-2">
+                <button class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-green-200 transition transform hover:-translate-y-0.5" type="submit">
+                    Fazer Login
                 </button>
             </div>
-            <div class="mt-4 text-center">
-                <a href="/register" class="text-sm text-blue-600 hover:underline">Ainda não tem conta? Registre-se</a>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 text-sm">Ainda não tem conta? <br>
+                    <a href="/register" class="text-green-600 font-semibold hover:text-green-800 hover:underline transition">Cadastre-se rapidinho</a>
+                </p>
             </div>
         </form>
     </div>
-
-</body>
-</html>
+</main>
+<?php $this->endSection(); ?>
