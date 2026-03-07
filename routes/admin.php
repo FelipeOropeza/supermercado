@@ -8,6 +8,9 @@ use Core\Routing\Route;
 Route::group(['prefix' => '/admin', 'middleware' => 'admin'], function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/categorias', [AdminController::class, 'categorias'])->name('admin.categorias.index');
+    Route::post('/categorias', [AdminController::class, 'categoriasStore'])->name('admin.categorias.store');
+    Route::post('/categorias/{id}/update', [AdminController::class, 'categoriasUpdate'])->name('admin.categorias.update');
+    Route::post('/categorias/{id}', [AdminController::class, 'categoriasDestroy'])->name('admin.categorias.destroy');
     Route::get('/produtos', [AdminController::class, 'produtos'])->name('admin.produtos.index');
     Route::get('/promocoes', [AdminController::class, 'promocoes'])->name('admin.promocoes.index');
     Route::get('/acessos', [AdminController::class, 'acessos'])->name('admin.acessos.index');
