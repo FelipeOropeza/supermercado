@@ -93,12 +93,12 @@ class Kernel
         echo "  make:controller <Nome>   Cria um novo Controller\n";
         echo "  make:model <Nome>        Cria um novo Model\n";
         echo "  make:view <Nome>         Cria uma nova View automaticamente na extensão correta\n";
+        echo "  make:component <Nome>    Cria um novo Componente HTMX reativo. Ex: table_users\n";
         echo "  make:service <Nome>      Cria um novo Service de regra de negócio para injetar. Ex: UserService\n";
         echo "  make:migration <Nome>    Cria uma nova Migration de Banco de Dados. Ex: CreateUsersTable\n";
         echo "  make:middleware <Nome>   Cria um novo Middleware de validação. Ex: AuthMiddleware\n";
         echo "  make:rule <Nome>         Cria um atributo de Validação customizado. Ex: CpfValido\n";
         echo "  make:mutator <Nome>      Cria um atributo de Mutação customizado. Ex: LimpaCpf\n";
-        echo "  make:component <Nome>    Cria um novo Componente HTMX para reutilização. Ex: tabela_usuarios\n";
         echo "  migrate                  Gera o Banco de Dados ausente (se possível) e roda as Migrations\n";
         echo "  setup:engine <php|twig>  Muda o motor padrão do projeto e limpa views não utilizadas\n";
         echo "  setup:auth               Instala o scaffolding completo de Autenticação (Login, Registro, DB)\n";
@@ -718,7 +718,6 @@ class Kernel
 
                     $pdoApp->exec("TRUNCATE TABLE migrations");
                     echo "\n✅ Rollback completado.\n\n";
-
                 } else {
                     echo "Nenhuma migration rodada detectada para rollback.\n\n";
                 }
@@ -850,14 +849,14 @@ class Kernel
         // Certifica compatibilidade de views PHP
         $engine = $this->config['app']['view_engine'] ?? 'php';
         $extension = $engine === 'twig' ? '.twig' : '.php';
-        
+
         $fileName = str_ends_with($name, $extension) ? $name : $name . $extension;
         $classNameRaw = str_replace($extension, '', $fileName);
 
         // Preparamos a pasta 'components' dentro de 'views' globalmente
         $viewsDir = rtrim($this->config['paths']['views'], '/');
         $componentsDir = $viewsDir . '/components';
-        
+
         if (!is_dir($componentsDir)) {
             mkdir($componentsDir, 0777, true);
         }
@@ -869,20 +868,18 @@ class Kernel
             exit(1);
         }
 
-        // Template Cru Básico para o HTMX
-        $content = <<<PHP
-        <!-- Componente: {$classNameRaw} -->
-        <div id="comp-{$classNameRaw}" class="component-wrapper">
-            <!-- 
-               O HTMX por padrão fará atualizações neste elemento 
-               ou você pode engatinhar aqui para responder a um hx-trigger 
-            -->
-            <p>Componente gerado via Forge CLI!</p>
-        </div>
-        PHP;
+        // Utiliza o novo template HTML .stub
+        $templatePath = $this->config['paths']['templates'] . '/component.stub';
+        if (!file_exists($templatePath)) {
+            echo "Erro: Template não encontrado em: $templatePath\n";
+            exit(1);
+        }
+
+        $content = file_get_contents($templatePath);
+        $content = str_replace('{{className}}', $classNameRaw, $content);
 
         file_put_contents($path, $content);
-        
+
         echo "✅ Componente HTMX '$fileName' criado em: app/Views/components/$fileName\n";
         echo "💡 Dica de uso na View: include('components/{$classNameRaw}') \n";
     }

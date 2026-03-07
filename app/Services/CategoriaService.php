@@ -43,6 +43,11 @@ class CategoriaService
         $this->categoriaModel->delete($id);
     }
 
+    public function getById($id)
+    {
+        return $this->categoriaModel->find($id);
+    }
+
     public function getAll()
     {
         return $this->categoriaModel->all();

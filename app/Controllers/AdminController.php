@@ -28,6 +28,17 @@ class AdminController
         return view('admin/categorias/index', ['categorias' => $categorias]);
     }
 
+    public function categoriasCreate()
+    {
+        return view('admin/categorias/modals/create');
+    }
+
+    public function categoriasEdit($id)
+    {
+        $categoria = $this->categoriaService->getById($id);
+        return view('admin/categorias/modals/edit', ['categoria' => $categoria]);
+    }
+
     public function categoriasStore(CategoriaDTO $dto)
     {
         try {

@@ -7,7 +7,7 @@
             <h2 class="text-3xl font-bold text-gray-900">Categorias</h2>
             <p class="text-gray-500 text-sm mt-1">Gerencie os corredores do seu supermercado online.</p>
         </div>
-        <button onclick="document.getElementById('modal-nova-categoria').classList.remove('hidden')" class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+        <button hx-get="<?= route('admin.categorias.create') ?>" hx-target="#modal-container" class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow-sm transition-colors flex items-center gap-2">
             <span>+</span> Nova Categoria
         </button>
     </div>
@@ -37,7 +37,7 @@
                                 <td class="py-4 px-6 text-base font-medium"><?= $categoria->descricao ?></td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex justify-end gap-2">
-                                        <button onclick='abrirModalEditar(<?= $categoria->id ?>, <?= json_encode($categoria->nome) ?>, <?= json_encode($categoria->descricao) ?>)' class="text-blue-600 hover:text-blue-800 font-medium p-1">Editar</button>
+                                        <button hx-get="<?= route('admin.categorias.edit', ['id' => $categoria->id]) ?>" hx-target="#modal-container" class="text-blue-600 hover:text-blue-800 font-medium p-1">Editar</button>
                                         <form action="<?= route('admin.categorias.destroy', ['id' => $categoria->id]) ?>" method="POST">
                                             <?= csrf_field() ?>
                                             <button type="submit" class="text-red-500 hover:text-red-700 font-medium p-1">Remover</button>
@@ -52,27 +52,24 @@
         </div>
     </div>
 
-    <?= $this->include('admin/categorias/modals/create') ?>
-    <?= $this->include('admin/categorias/modals/edit') ?>
+    <!-- Modal Container HTMX -->
+    <div id="modal-container"></div>
+    
+    <!-- Modais de Erro Direto na Página -->
+    <?php if (!empty(errors())): ?>
+        <?php if (empty(old('id'))): ?>
+            <?= $this->include('admin/categorias/modals/create') ?>
+        <?php else: ?>
+            <!-- Como precisamos da categoria para o edit, vamos incluí-la via subrequest interno ou buscar via query -->
+            <?php 
+                $categoriaErro = (new \App\Services\CategoriaService())->getById(old('id')); 
+                if ($categoriaErro) {
+                    echo $this->include('admin/categorias/modals/edit', ['categoria' => $categoriaErro]);
+                }
+            ?>
+        <?php endif; ?>
+    <?php endif; ?>
 </div>
-
-<script>
-    function abrirModalEditar(id, nome, descricao) {
-        document.getElementById('edit-id').value = id;
-        document.getElementById('edit-nome').value = nome;
-        
-        let descInput = document.getElementById('edit-descricao');
-        descInput.value = (descricao === 'Não foi colocado' || descricao === null) ? '' : descricao;
-        
-        let form = document.getElementById('form-editar-categoria');
-        form.action = '/admin/categorias/' + id + '/update';
-        
-        let erroNome = document.getElementById('edit-erro-nome');
-        if (erroNome) erroNome.remove(); // Limpar aviso caso abra de outro
-
-        document.getElementById('modal-editar-categoria').classList.remove('hidden');
-    }
-</script>
 
 <style>
     @keyframes fadeInUp {

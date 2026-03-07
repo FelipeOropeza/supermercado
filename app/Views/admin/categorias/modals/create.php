@@ -1,10 +1,10 @@
 <?php $isCreatingError = empty(old('id')) && !empty(errors()); ?>
-<div id="modal-nova-categoria" class="<?= $isCreatingError ? '' : 'hidden ' ?>fixed inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
+<div id="modal-nova-categoria" class="fixed inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden animate-fade-in-up">
 
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
             <h3 class="text-lg font-bold text-gray-900">Nova Categoria</h3>
-            <button onclick="document.getElementById('modal-nova-categoria').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 transition">
+            <button onclick="document.getElementById('modal-nova-categoria').remove()" class="text-gray-400 hover:text-gray-700 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -28,7 +28,7 @@
             </div>
 
             <div class="flex justify-end gap-3 mt-4">
-                <button type="button" onclick="document.getElementById('modal-nova-categoria').classList.add('hidden')" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                <button type="button" onclick="document.getElementById('modal-nova-categoria').remove()" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
                     Cancelar
                 </button>
                 <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">
