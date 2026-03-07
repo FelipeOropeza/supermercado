@@ -11,8 +11,8 @@ class AdminMiddleware implements MiddlewareInterface
     public function handle(Request $request, Closure $next)
     {
         if (!session()->has('user') || session()->get('user')['role'] !== 'admin') {
-            // Em aplicação real, redirecionamos para / ou damos erro 403.
-            return \Core\Http\Response::makeRedirect('/dashboard');
+            // Se não tá logado ou não é admin, vaza
+            return \Core\Http\Response::makeRedirect('/login');
         }
 
         return $next($request);

@@ -10,7 +10,6 @@ class Categoria extends Model
 
     protected array $fillable = [
         'nome',
-        'slug',
         'descricao'
     ];
 

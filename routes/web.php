@@ -11,3 +11,6 @@ use Core\Routing\Route;
 
 // Inclui Rotas de Autenticação Auxiliares
 require_once __DIR__ . '/auth.php';
+
+// Inclui Rotas do Painel Administrativo
+require_once __DIR__ . '/admin.php';

@@ -36,6 +36,10 @@ class AuthController
             'role' => $usuario->role ?? 'cliente'
         ]);
 
+        if ($usuario->role === 'admin') {
+            return Response::makeRedirect('/admin');
+        }
+
         return Response::makeRedirect('/');
     }
 

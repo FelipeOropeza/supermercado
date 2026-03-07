@@ -12,10 +12,8 @@ class CreateCategoriasTable
         Schema::create('categorias', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
-            $table->string('slug')->unique();
             $table->text('descricao')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

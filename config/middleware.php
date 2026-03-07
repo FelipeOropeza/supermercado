@@ -45,6 +45,7 @@ return [
      */
     'aliases' => [
         'auth' => \App\Middleware\AuthMiddleware::class,
+        'admin' => \App\Middleware\AdminMiddleware::class,
         // 'guest' => \App\Middleware\RedirectIfAuthenticated::class,
     ],
 ];
