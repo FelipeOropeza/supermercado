@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\DTOs\Admin\CategoriaDTO;
 use App\DTOs\Admin\EditCategoriaDTO;
+use App\DTOs\Admin\EditProdutoDTO;
 use App\DTOs\Admin\ProdutoDTO;
 use App\Services\CategoriaService;
 use App\Services\ProdutoService;
@@ -125,7 +126,7 @@ class AdminController
         ]);
     }
 
-    public function produtosUpdate(ProdutoDTO $dto, int|string $id): Response
+    public function produtosUpdate(EditProdutoDTO $dto, int|string $id): Response
     {
         try {
             $this->produtoService->update($id, $dto);

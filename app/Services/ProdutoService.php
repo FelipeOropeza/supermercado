@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Produto;
 use App\DTOs\Admin\ProdutoDTO;
+use App\DTOs\Admin\EditProdutoDTO;
 
 class ProdutoService
 {
@@ -37,12 +38,16 @@ class ProdutoService
         return $this->produtoModel->find($id);
     }
 
-    public function update(int|string $id, ProdutoDTO $dto): bool
+    /** @param int|string $id @param EditProdutoDTO $dto */
+    public function update(int|string $id, EditProdutoDTO $dto): bool
     {
         $data = $dto->toArray();
 
-        if ($dto->imagem_url instanceof \Core\Http\UploadedFile) {
+        if (isset($data['imagem_url']) && $dto->imagem_url instanceof \Core\Http\UploadedFile) {
             $data['imagem_url'] = $dto->imagem_url->store('produtos', 'local');
+        } else {
+            // Mantém a imagem existente — não sobrescreve com null
+            unset($data['imagem_url']);
         }
 
         return $this->produtoModel->update($id, $data);

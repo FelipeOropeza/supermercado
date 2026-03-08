@@ -45,9 +45,9 @@ $categoriasList = (new \App\Services\CategoriaService())->getAll();
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Imagem Principal</label>
-                    <input type="file" name="imagem" accept="image/*" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                    <?php if ($isEditingError && errors('imagem')): ?>
-                        <span class="text-red-500 text-xs mt-1 block"><?= errors('imagem') ?></span>
+                    <input type="file" name="imagem_url" accept="image/*" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    <?php if ($isEditingError && errors('imagem_url')): ?>
+                        <span class="text-red-500 text-xs mt-1 block"><?= errors('imagem_url') ?></span>
                     <?php endif; ?>
                     <?php if($produto->imagem_url): ?>
                         <p class="text-xs text-gray-500 mt-1">Já possui imagem. Envie outra para substituir.</p>
