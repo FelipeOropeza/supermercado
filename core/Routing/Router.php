@@ -272,16 +272,27 @@ class Router
                 if (is_array($action) && isset($action['factory']) && is_callable($action['factory'])) {
                     $controllerInstance = $action['factory']();
                     // Invoca os métodos utilizando Reflection leve apenas para parametros de injeção da rota
-                    return $container->call([$controllerInstance, $action['method']], $params);
+                    $result = $container->call([$controllerInstance, $action['method']], $params);
+                } elseif (is_callable($action) && !is_array($action)) {
+                    // Se a ação já for um callable simples (Closure)
+                    $result = call_user_func_array($action, array_values($params));
+                } else {
+                    // O Action Controller puro
+                    $result = $container->call($action, $params);
                 }
 
-                // Se a ação já for um callable simples (Closure)
-                if (is_callable($action) && !is_array($action)) {
-                    return call_user_func_array($action, array_values($params));
+                // Normaliza o retorno para Response dentro do destination.
+                // Isso garante que Middlewares com type-hint (ex: : Response) não quebrem
+                // quando o Controller retorna apenas uma string ou array.
+                if ($result instanceof \Core\Http\Response) {
+                    return $result;
                 }
 
-                // O Action Controller puro
-                return $container->call($action, $params);
+                if (is_array($result) || is_object($result)) {
+                    return \Core\Http\Response::makeJson($result);
+                }
+
+                return new \Core\Http\Response((string) $result);
             }; // Fim da destination / Action Controller
 
 
@@ -312,16 +323,7 @@ class Router
                 ->through($resolvedMiddlewares)
                 ->then($destination);
 
-            // Garante que o retorno seja sempre um objeto Core\Http\Response
-            if ($result instanceof \Core\Http\Response) {
-                return $result;
-            }
-
-            if (is_array($result) || is_object($result)) {
-                return \Core\Http\Response::makeJson($result);
-            }
-
-            return new \Core\Http\Response((string) $result);
+            return $result;
         }
 
         // 404 handling simples

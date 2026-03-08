@@ -925,12 +925,15 @@ class Kernel
         echo " Pressione \033[1;31mCtrl+C\033[0m para encerrar o servidor.\n\n";
 
         // 3. Comando (Redirecionamos stderr para stdout para ler tudo num handle só)
-        $router = realpath(__DIR__ . '/../../server.php');
+        $rootPath = realpath(__DIR__ . '/../../');
+        $publicPath = realpath($rootPath . '/public');
+        $router = realpath($rootPath . '/server.php');
         
         if ($router) {
-            $command = sprintf('php -S %s:%d %s 2>&1', $host, $port, escapeshellarg($router));
+            // Se temos o router script, usamos ele com -t public
+            $command = sprintf('php -S %s:%d -t %s %s 2>&1', $host, $port, escapeshellarg($publicPath), escapeshellarg($router));
         } else {
-            $publicPath = realpath(__DIR__ . '/../../public');
+            // Sem router, apenas -t public
             $command = sprintf('php -S %s:%d -t %s 2>&1', $host, $port, escapeshellarg($publicPath));
         }
 

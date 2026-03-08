@@ -10,11 +10,8 @@ class Categoria extends Model
 
     protected array $fillable = [
         'nome',
-        'descricao',
-        'deleted_at'
+        'descricao'
     ];
-
-    public bool $softDeletes = true;
 
     public function produtos()
     {
