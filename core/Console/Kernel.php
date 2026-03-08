@@ -926,7 +926,13 @@ class Kernel
 
         // 3. Comando (Redirecionamos stderr para stdout para ler tudo num handle só)
         $router = realpath(__DIR__ . '/../../server.php');
-        $command = sprintf('php -S %s:%d %s 2>&1', $host, $port, escapeshellarg($router));
+        
+        if ($router) {
+            $command = sprintf('php -S %s:%d %s 2>&1', $host, $port, escapeshellarg($router));
+        } else {
+            $publicPath = realpath(__DIR__ . '/../../public');
+            $command = sprintf('php -S %s:%d -t %s 2>&1', $host, $port, escapeshellarg($publicPath));
+        }
 
         // 4. Execução via popen (Mais estável para leitura de fluxo contínuo no Windows)
         $handle = popen($command, 'r');

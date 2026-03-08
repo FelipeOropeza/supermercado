@@ -103,19 +103,13 @@ class AdminController
 
     public function produtosEdit($id)
     {
-        // TODO: Implementar $this->produtoService->getById($id);
-        // Retornando mock temporário para o HTMX não dar erro visual
-        $produtoMock = (object) [
-            'id' => $id, 
-            'nome' => '', 
-            'categoria_id' => '', 
-            'descricao' => '', 
-            'preco' => '', 
-            'estoque' => '', 
-            'imagem_url' => '', 
-            'ativo' => 1
-        ];
-        return view('admin/produtos/modals/edit', ['produto' => $produtoMock]);
+        $produto = $this->produtoService->getById($id);
+        $categoriasList = $this->categoriaService->getAll();
+        
+        return view('admin/produtos/modals/edit', [
+            'produto' => $produto,
+            'categoriasList' => $categoriasList
+        ]);
     }
 
     public function promocoes()
