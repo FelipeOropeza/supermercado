@@ -14,6 +14,11 @@ Route::group(['prefix' => '/admin', 'middleware' => 'admin'], function () {
     Route::post('/categorias/{id}/update', [AdminController::class, 'categoriasUpdate'])->name('admin.categorias.update');
     Route::post('/categorias/{id}', [AdminController::class, 'categoriasDestroy'])->name('admin.categorias.destroy');
     Route::get('/produtos', [AdminController::class, 'produtos'])->name('admin.produtos.index');
+    Route::get('/produtos/create', [AdminController::class, 'produtosCreate'])->name('admin.produtos.create');
+    Route::post('/produtos', [AdminController::class, 'produtosStore'])->name('admin.produtos.store');
+    Route::get('/produtos/{id}/edit', [AdminController::class, 'produtosEdit'])->name('admin.produtos.edit');
+    Route::post('/produtos/{id}/update', [AdminController::class, 'produtosUpdate'])->name('admin.produtos.update');
+    Route::post('/produtos/{id}', [AdminController::class, 'produtosDestroy'])->name('admin.produtos.destroy');
     Route::get('/promocoes', [AdminController::class, 'promocoes'])->name('admin.promocoes.index');
     Route::get('/acessos', [AdminController::class, 'acessos'])->name('admin.acessos.index');
 });

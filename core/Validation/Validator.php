@@ -31,9 +31,6 @@ class Validator
             // Pega o valor enviado ou null se não existir
             $value = $inputData[$name] ?? null;
 
-            // Atribui o valor ao objeto Request DTO
-            $property->setValue($requestObject, $value);
-
             // Pega as regras em formato de Atributos do PHP 8
             $attributes = $property->getAttributes(ValidationRule::class, \ReflectionAttribute::IS_INSTANCEOF);
 
