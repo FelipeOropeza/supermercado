@@ -5,8 +5,7 @@ namespace App\DTOs\Usuario;
 use Core\Validation\DataTransferObject;
 use Core\Attributes\Required;
 use Core\Attributes\Min;
-
-use App\Rules\UniqueCepRule;
+use Core\Attributes\Unique;
 
 class EnderecoDTO extends DataTransferObject
 {
@@ -15,7 +14,7 @@ class EnderecoDTO extends DataTransferObject
 
     #[Required(message: 'O CEP é obrigatório.')]
     #[Min(8, message: 'O CEP deve ter pelo menos 8 caracteres.')]
-    #[UniqueCepRule]
+    #[Unique(table: 'enderecos', column: 'cep', message: 'CEP já cadastrado.', ignore: 'id')]
     public string $cep;
 
     #[Required(message: 'A rua é obrigatória.')]

@@ -68,4 +68,9 @@ class ProdutoService
     {
         return $this->produtoModel->delete($id);    
     }
+
+    public function count()
+    {
+        return $this->produtoModel->count();
+    }
 }

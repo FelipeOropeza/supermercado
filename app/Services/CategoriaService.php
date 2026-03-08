@@ -74,15 +74,6 @@ class CategoriaService
 
     public function count()
     {
-        $result = $this->categoriaModel->query(
-            'SELECT COUNT(*) as total FROM categorias'
-        );
-
-        if (!empty($result)) {
-            $first = $result[0];
-            return is_object($first) ? $first->total : $first['total'];
-        }
-
-        return 0;
+        return $this->categoriaModel->count();
     }
 }

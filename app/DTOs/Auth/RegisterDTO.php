@@ -8,6 +8,7 @@ use Core\Attributes\Email;
 use Core\Attributes\Hash;
 use Core\Attributes\MatchField;
 use Core\Attributes\Min;
+use Core\Attributes\Unique;
 
 class RegisterDTO extends DataTransferObject
 {
@@ -16,7 +17,7 @@ class RegisterDTO extends DataTransferObject
 
     #[Required(message: 'O e-mail é obrigatório.')]
     #[Email(message: 'Forneça um e-mail válido.')]
-    #[\Core\Attributes\Unique('usuarios', 'email', message: 'Este e-mail já está em uso.')]
+    #[Unique(table: 'usuarios', column: 'email', message: 'Este e-mail já está em uso.', ignore: 'id')]
     public string $email;
 
     #[Required(message: 'A senha é obrigatória.')]

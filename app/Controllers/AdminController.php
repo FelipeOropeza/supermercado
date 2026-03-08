@@ -23,7 +23,8 @@ class AdminController
     public function dashboard()
     {
         $totalCategorias = $this->categoriaService->count();
-        return view('admin/dashboard', ['totalCategorias' => $totalCategorias]);
+        $totalProdutos = $this->produtoService->count();
+        return view('admin/dashboard', ['totalCategorias' => $totalCategorias, 'totalProdutos' => $totalProdutos]);
     }
 
     public function categorias()

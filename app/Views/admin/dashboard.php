@@ -21,7 +21,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
             <div>
                 <p class="text-sm font-medium text-gray-500">Produtos</p>
-                <p class="text-2xl font-semibold text-gray-900 mt-1">145</p>
+                <p class="text-2xl font-semibold text-gray-900 mt-1"><?= $totalProdutos ?></p>
             </div>
             <div class="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center text-xl font-bold">P</div>
         </div>
