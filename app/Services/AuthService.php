@@ -28,10 +28,6 @@ class AuthService
 
     public function registrar(RegisterDTO $dto): object
     {
-        if ($this->usuarioModel->where('email', '=', $dto->email)->first()) {
-            fail_validation(['email' => 'Este e-mail já está em uso.']);
-        }
-
         $data = $dto->toArray();
         unset($data['senha_confirmacao']);
 

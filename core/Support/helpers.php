@@ -241,10 +241,8 @@ if (!function_exists('csrf_field')) {
 
 if (!function_exists('storage_url')) {
     /**
-     * Gera a URL pública para um arquivo armazenado no storage.
-     * 
-     * @param string|null $path O caminho relativo dentro da pasta storage
-     * @return string A URL pública
+     * Gera a URL pública para um arquivo armazenado na pasta storage.
+     * Ex: storage_url('produtos/foto.jpg') -> '/storage/produtos/foto.jpg'
      */
     function storage_url(?string $path): string
     {
@@ -252,7 +250,11 @@ if (!function_exists('storage_url')) {
             return '';
         }
 
-        // Remove barras duplicadas e garante o prefixo /storage/
+        // Se o path já for uma URL completa, retorna ela mesma
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
         return '/storage/' . ltrim($path, '/');
     }
 }

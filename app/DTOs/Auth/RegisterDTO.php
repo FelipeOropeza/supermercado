@@ -16,6 +16,7 @@ class RegisterDTO extends DataTransferObject
 
     #[Required(message: 'O e-mail é obrigatório.')]
     #[Email(message: 'Forneça um e-mail válido.')]
+    #[\Core\Attributes\Unique('usuarios', 'email', message: 'Este e-mail já está em uso.')]
     public string $email;
 
     #[Required(message: 'A senha é obrigatória.')]

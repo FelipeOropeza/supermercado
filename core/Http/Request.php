@@ -143,4 +143,12 @@ class Request
     {
         return isset($this->server['HTTP_HX_REQUEST']) && $this->server['HTTP_HX_REQUEST'] === 'true';
     }
+
+    /**
+     * Verifica se a requisição é AJAX clássico (jQuery/Fetch com header padrão)
+     */
+    public function isAjax(): bool
+    {
+        return isset($this->server['HTTP_X_REQUESTED_WITH']) && $this->server['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+    }
 }

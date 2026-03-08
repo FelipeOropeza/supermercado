@@ -15,6 +15,9 @@ return [
         'middlewares' => __DIR__ . '/../app/Middleware',
         'views' => __DIR__ . '/../app/Views',
         'migrations' => __DIR__ . '/../database/migrations',
+        'services' => __DIR__ . '/../app/Services',
+        'dtos' => __DIR__ . '/../app/DTOs',
+        'seeders' => __DIR__ . '/../database/seeders',
 
         // Caminho físico dos templates usados pelos comandos do Console
         'templates' => __DIR__ . '/../core/Console/Templates',

@@ -284,6 +284,14 @@ abstract class Model
     }
 
     /**
+     * Retorna a contagem de registros baseada na query.
+     */
+    public function count(string $column = '*'): int
+    {
+        return $this->newQuery()->count($column);
+    }
+
+    /**
      * Inicia uma verificação fluente na Tabela
      * Ex: $produto->where('preco', '>', 50)->get();
      */
