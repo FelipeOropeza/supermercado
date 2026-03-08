@@ -22,7 +22,7 @@ class AdminController
         $this->produtoService   = app(ProdutoService::class);
     }
 
-    public function dashboard(): Response
+    public function dashboard(): mixed
     {
         $totalCategorias = $this->categoriaService->count();
         $totalProdutos   = $this->produtoService->count();
@@ -33,18 +33,18 @@ class AdminController
         ]);
     }
 
-    public function categorias(): Response
+    public function categorias(): mixed
     {
         $categorias = $this->categoriaService->getAll();
         return view('admin/categorias/index', ['categorias' => $categorias]);
     }
 
-    public function categoriasCreate(): Response
+    public function categoriasCreate(): mixed
     {
         return view('admin/categorias/modals/create');
     }
 
-    public function categoriasEdit(int|string $id): Response
+    public function categoriasEdit(int|string $id): mixed
     {
         $categoria = $this->categoriaService->getById($id);
         return view('admin/categorias/modals/edit', ['categoria' => $categoria]);
@@ -89,13 +89,13 @@ class AdminController
         return Response::makeRedirect('/admin/categorias');
     }
 
-    public function produtos(): Response
+    public function produtos(): mixed
     {
         $produtos = $this->produtoService->getAll();
         return view('admin/produtos/index', ['produtos' => $produtos]);
     }
 
-    public function produtosCreate(): Response
+    public function produtosCreate(): mixed
     {
         $categoriasList = $this->categoriaService->getAll();
         return view('admin/produtos/modals/create', ['categoriasList' => $categoriasList]);
@@ -114,7 +114,7 @@ class AdminController
         return Response::makeRedirect('/admin/produtos');
     }
 
-    public function produtosEdit(int|string $id): Response
+    public function produtosEdit(int|string $id): mixed
     {
         $produto        = $this->produtoService->getById($id);
         $categoriasList = $this->categoriaService->getAll();
@@ -151,12 +151,12 @@ class AdminController
         return Response::makeRedirect('/admin/produtos');
     }
 
-    public function promocoes(): Response
+    public function promocoes(): mixed
     {
         return view('admin/promocoes/index');
     }
 
-    public function acessos(): Response
+    public function acessos(): mixed
     {
         return view('admin/acessos/index');
     }

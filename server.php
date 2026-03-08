@@ -9,11 +9,14 @@ $uri = urldecode(
     parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)
 );
 
-// Com o uso de -t public no comando, o PHP já serve arquivos estáticos.
-// Este script só é invocado quando o arquivo solicitado não existe fisicamente.
+// Se o arquivo existe fisicamente dentro de public/, servimos direto (arquivos estáticos: CSS, JS, imagens, storage)
+$publicPath = __DIR__ . '/public' . $uri;
+if ($uri !== '/' && file_exists($publicPath) && is_file($publicPath)) {
+    return false; // PHP built-in server serves the file directly
+}
 
-// Normaliza o ambiente para o framework
-$_SERVER['SCRIPT_NAME'] = '/index.php';
+// Normaliza o ambiente para o framework (garante que o SCRIPT_NAME esteja correto)
+$_SERVER['SCRIPT_NAME']     = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/public/index.php';
 
 require_once __DIR__ . '/public/index.php';

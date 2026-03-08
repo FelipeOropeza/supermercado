@@ -35,18 +35,22 @@
                         <?php foreach ($produtos as $produto): ?>
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="py-4 px-6">
-                                    <?php if($produto->imagem_url): ?>
-                                        <div class="w-10 h-10 rounded-md bg-cover bg-center border border-gray-200" style="background-image: url('<?= storage_url($produto->imagem_url) ?>')"></div>
+                                    <?php if ($produto->imagem_url): ?>
+                                        <div class="w-10 h-10 rounded-md border border-gray-200 overflow-hidden">
+                                            <img src="<?= storage_url($produto->imagem_url) ?>" alt="<?= htmlspecialchars($produto->nome) ?>" class="w-full h-full object-cover">
+                                        </div>
                                     <?php else: ?>
                                         <div class="w-10 h-10 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
                                         </div>
                                     <?php endif; ?>
                                 </td>
                                 <td class="py-4 px-6 text-base font-medium">
                                     <div class="flex items-center gap-2">
                                         <?= htmlspecialchars($produto->nome) ?>
-                                        <?php if(!$produto->ativo): ?>
+                                        <?php if (!$produto->ativo): ?>
                                             <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-500">Inativo</span>
                                         <?php endif; ?>
                                     </div>
@@ -79,17 +83,17 @@
 
     <!-- Modal Container HTMX -->
     <div id="modal-container"></div>
-    
+
     <!-- Modais de Erro Direto na Página (Fallback pra não perder preenchimento em validation error) -->
     <?php if (!empty(errors())): ?>
         <?php if (empty(old('id'))): ?>
             <?= $this->include('admin/produtos/modals/create') ?>
         <?php else: ?>
-            <?php 
-                $produtoErro = (new \App\Services\ProdutoService())->getById(old('id')); 
-                if ($produtoErro) {
-                    echo $this->include('admin/produtos/modals/edit', ['produto' => $produtoErro]);
-                }
+            <?php
+            $produtoErro = (new \App\Services\ProdutoService())->getById(old('id'));
+            if ($produtoErro) {
+                echo $this->include('admin/produtos/modals/edit', ['produto' => $produtoErro]);
+            }
             ?>
         <?php endif; ?>
     <?php endif; ?>
@@ -97,9 +101,17 @@
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animate-fade-in-up {
         animation: fadeInUp 0.3s ease-out forwards;
     }
