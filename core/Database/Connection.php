@@ -59,10 +59,11 @@ class Connection
                 self::$instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
                 self::$instance->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
             } catch (PDOException $e) {
-                http_response_code(500);
-                // Em produção, você não deveria exibir o erro real na tela por segurança.
-                echo "Erro de conexão com o Banco de Dados: " . $e->getMessage();
-                exit;
+                throw new \RuntimeException(
+                    "Não foi possível conectar ao banco de dados.",
+                    500,
+                    $e
+                );
             }
         }
 

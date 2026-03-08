@@ -176,6 +176,23 @@ class QueryBuilder
         return $results[0] ?? null;
     }
 
+    /**
+     * Executa um DELETE com os filtros WHERE acumulados.
+     * Ex: $model->where('usuario_id', '=', 1)->where('id', '=', 5)->delete();
+     */
+    public function delete(): bool
+    {
+        $sql = "DELETE FROM {$this->table}";
+
+        if (!empty($this->wheres)) {
+            $sql .= " WHERE " . implode(' AND ', $this->wheres);
+        }
+
+        $stmt = $this->db->prepare($sql);
+
+        return $stmt->execute($this->params);
+    }
+
     protected function eagerLoadRelations(array $models): array
     {
         $first = $models[0];

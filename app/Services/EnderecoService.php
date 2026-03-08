@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Endereco;
@@ -49,16 +51,13 @@ class EnderecoService
     }
 
     /**
-     * Deleta um endereço.
+     * Deleta um endereço garantindo que ele pertença ao usuário.
      */
     public function delete(int $id, int $usuarioId): bool
     {
-        // Garante que só deleta se for do dono
-        $sql = "DELETE FROM enderecos WHERE id = :id AND usuario_id = :uid";
-        $stmt = \Core\Database\Connection::getInstance()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->bindValue(':uid', $usuarioId);
-
-        return $stmt->execute();
+        return $this->model
+            ->where('id', '=', $id)
+            ->where('usuario_id', '=', $usuarioId)
+            ->delete();
     }
 }

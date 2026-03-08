@@ -37,9 +37,10 @@ class AuthService
         $id = $this->usuarioModel->insert($data);
 
         return (object)[
-            'id' => $id,
-            'nome' => $dto->nome,
-            'email' => $dto->email
+            'id'    => $id,
+            'nome'  => $dto->nome,
+            'email' => $dto->email,
+            'role'  => 'cliente'
         ];
     }
 }

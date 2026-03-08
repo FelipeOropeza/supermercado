@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTOs\Admin\CategoriaDTO;
@@ -15,13 +17,9 @@ class CategoriaService
         $this->categoriaModel = new Categoria();
     }
 
-    public function create(CategoriaDTO $dto)
+    public function create(CategoriaDTO $dto): int
     {
-        $data = $dto->toArray();
-
-        if (empty(trim($data['descricao'] ?? ''))) {
-            $data['descricao'] = 'Não foi colocado';
-        }
+        $data = $this->normalizeDescricao($dto->toArray());
 
         $categoriaID = $this->categoriaModel->insert($data);
 
@@ -32,7 +30,7 @@ class CategoriaService
         return $categoriaID;
     }
 
-    public function delete($id)
+    public function delete(int|string $id): void
     {
         $categoria = $this->categoriaModel->find($id);
 
@@ -43,17 +41,17 @@ class CategoriaService
         $this->categoriaModel->delete($id);
     }
 
-    public function getById($id)
+    public function getById(int|string $id): ?Categoria
     {
         return $this->categoriaModel->find($id);
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         return $this->categoriaModel->all();
     }
 
-    public function update($id, EditCategoriaDTO $dto)
+    public function update(int|string $id, EditCategoriaDTO $dto): bool
     {
         $categoria = $this->categoriaModel->find($id);
 
@@ -61,19 +59,25 @@ class CategoriaService
             throw new \Exception('Categoria não encontrada');
         }
 
-        $data = $dto->toArray();
+        $data = $this->normalizeDescricao($dto->toArray());
 
+        return $this->categoriaModel->update($id, $data);
+    }
+
+    public function count(): int
+    {
+        return $this->categoriaModel->count();
+    }
+
+    /**
+     * Garante que a descrição tenha um valor padrão se vier vazia.
+     */
+    private function normalizeDescricao(array $data): array
+    {
         if (empty(trim($data['descricao'] ?? ''))) {
             $data['descricao'] = 'Não foi colocado';
         }
 
-        $updated = $this->categoriaModel->update($id, $data);
-
-        return $updated;
-    }
-
-    public function count()
-    {
-        return $this->categoriaModel->count();
+        return $data;
     }
 }

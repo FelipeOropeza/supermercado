@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\DTOs\Admin\CategoriaDTO;
@@ -16,108 +18,145 @@ class AdminController
 
     public function __construct()
     {
-        $this->categoriaService = new CategoriaService();
-        $this->produtoService = new ProdutoService();
+        $this->categoriaService = app(CategoriaService::class);
+        $this->produtoService   = app(ProdutoService::class);
     }
 
-    public function dashboard()
+    public function dashboard(): Response
     {
         $totalCategorias = $this->categoriaService->count();
-        $totalProdutos = $this->produtoService->count();
-        return view('admin/dashboard', ['totalCategorias' => $totalCategorias, 'totalProdutos' => $totalProdutos]);
+        $totalProdutos   = $this->produtoService->count();
+
+        return view('admin/dashboard', [
+            'totalCategorias' => $totalCategorias,
+            'totalProdutos'   => $totalProdutos,
+        ]);
     }
 
-    public function categorias()
+    public function categorias(): Response
     {
         $categorias = $this->categoriaService->getAll();
-        
         return view('admin/categorias/index', ['categorias' => $categorias]);
     }
 
-    public function categoriasCreate()
+    public function categoriasCreate(): Response
     {
         return view('admin/categorias/modals/create');
     }
 
-    public function categoriasEdit($id)
+    public function categoriasEdit(int|string $id): Response
     {
         $categoria = $this->categoriaService->getById($id);
         return view('admin/categorias/modals/edit', ['categoria' => $categoria]);
     }
 
-    public function categoriasStore(CategoriaDTO $dto)
+    public function categoriasStore(CategoriaDTO $dto): Response
     {
         try {
             $this->categoriaService->create($dto);
         } catch (\Exception $e) {
+            session()->set('error', 'Erro ao criar categoria: ' . $e->getMessage());
             return Response::makeRedirect('/admin/categorias');
         }
 
+        session()->set('success', 'Categoria criada com sucesso!');
         return Response::makeRedirect('/admin/categorias');
     }
 
-    public function categoriasDestroy($id)
+    public function categoriasDestroy(int|string $id): Response
     {
         try {
             $this->categoriaService->delete($id);
         } catch (\Exception $e) {
+            session()->set('error', 'Erro ao excluir categoria: ' . $e->getMessage());
             return Response::makeRedirect('/admin/categorias');
         }
 
+        session()->set('success', 'Categoria excluída com sucesso!');
         return Response::makeRedirect('/admin/categorias');
     }
 
-    public function categoriasUpdate(EditCategoriaDTO $dto, $id)
+    public function categoriasUpdate(EditCategoriaDTO $dto, int|string $id): Response
     {
         try {
             $this->categoriaService->update($id, $dto);
         } catch (\Exception $e) {
+            session()->set('error', 'Erro ao atualizar categoria: ' . $e->getMessage());
             return Response::makeRedirect('/admin/categorias');
         }
 
+        session()->set('success', 'Categoria atualizada com sucesso!');
         return Response::makeRedirect('/admin/categorias');
     }
 
-    public function produtos()
+    public function produtos(): Response
     {
         $produtos = $this->produtoService->getAll();
         return view('admin/produtos/index', ['produtos' => $produtos]);
     }
 
-    public function produtosCreate()
+    public function produtosCreate(): Response
     {
         $categoriasList = $this->categoriaService->getAll();
         return view('admin/produtos/modals/create', ['categoriasList' => $categoriasList]);
     }
 
-    public function produtosStore(ProdutoDTO $dto)
+    public function produtosStore(ProdutoDTO $dto): Response
     {
         try {
             $this->produtoService->create($dto);
         } catch (\Exception $e) {
+            session()->set('error', 'Erro ao criar produto: ' . $e->getMessage());
             return Response::makeRedirect('/admin/produtos');
         }
 
+        session()->set('success', 'Produto criado com sucesso!');
         return Response::makeRedirect('/admin/produtos');
     }
 
-    public function produtosEdit($id)
+    public function produtosEdit(int|string $id): Response
     {
-        $produto = $this->produtoService->getById($id);
+        $produto        = $this->produtoService->getById($id);
         $categoriasList = $this->categoriaService->getAll();
-        
+
         return view('admin/produtos/modals/edit', [
-            'produto' => $produto,
-            'categoriasList' => $categoriasList
+            'produto'        => $produto,
+            'categoriasList' => $categoriasList,
         ]);
     }
 
-    public function promocoes()
+    public function produtosUpdate(ProdutoDTO $dto, int|string $id): Response
+    {
+        try {
+            $this->produtoService->update($id, $dto);
+        } catch (\Exception $e) {
+            session()->set('error', 'Erro ao atualizar produto: ' . $e->getMessage());
+            return Response::makeRedirect('/admin/produtos');
+        }
+
+        session()->set('success', 'Produto atualizado com sucesso!');
+        return Response::makeRedirect('/admin/produtos');
+    }
+
+    public function produtosDestroy(int|string $id): Response
+    {
+        try {
+            $this->produtoService->delete($id);
+        } catch (\Exception $e) {
+            session()->set('error', 'Erro ao excluir produto: ' . $e->getMessage());
+            return Response::makeRedirect('/admin/produtos');
+        }
+
+        session()->set('success', 'Produto excluído com sucesso!');
+        return Response::makeRedirect('/admin/produtos');
+    }
+
+    public function promocoes(): Response
     {
         return view('admin/promocoes/index');
     }
 
-    public function acessos()
+    public function acessos(): Response
     {
         return view('admin/acessos/index');
     }

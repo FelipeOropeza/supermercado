@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Produto;
@@ -8,68 +10,50 @@ use App\DTOs\Admin\ProdutoDTO;
 class ProdutoService
 {
     private Produto $produtoModel;
+
     public function __construct()
     {
         $this->produtoModel = new Produto();
     }
 
-    /**
-     * Creates a new Produto.
-     *
-     * @param ProdutoDTO $dto
-     * @return int
-     * @throws \Exception
-     */
     public function create(ProdutoDTO $dto): int
     {
-        try {
-            $data = $dto->toArray();
+        $data = $dto->toArray();
 
-            // Se for um objeto de upload, salvamos o arquivo fisicamente e guardamos apenas o caminho (string) no banco
-            if ($dto->imagem_url instanceof \Core\Http\UploadedFile) {
-                $path = $dto->imagem_url->store('produtos', 'local');
-                $data['imagem_url'] = $path;
-            }
-
-            return $this->produtoModel->insert($data);
-        } catch (\Exception $e) {
-            throw $e;
+        if ($dto->imagem_url instanceof \Core\Http\UploadedFile) {
+            $data['imagem_url'] = $dto->imagem_url->store('produtos', 'local');
         }
+
+        return $this->produtoModel->insert($data);
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         return $this->produtoModel->all();
     }
 
-    public function getById($id)
+    public function getById(int|string $id): ?Produto
     {
         return $this->produtoModel->find($id);
     }
 
-    public function update($id, ProdutoDTO $dto)
+    public function update(int|string $id, ProdutoDTO $dto): bool
     {
-        try {
-            $data = $dto->toArray();
+        $data = $dto->toArray();
 
-            // Se for um objeto de upload, salvamos o arquivo fisicamente e guardamos apenas o caminho (string) no banco
-            if ($dto->imagem_url instanceof \Core\Http\UploadedFile) {
-                $path = $dto->imagem_url->store('produtos', 'local');
-                $data['imagem_url'] = $path;
-            }
-
-            return $this->produtoModel->update($id, $data);
-        } catch (\Exception $e) {
-            throw $e;
+        if ($dto->imagem_url instanceof \Core\Http\UploadedFile) {
+            $data['imagem_url'] = $dto->imagem_url->store('produtos', 'local');
         }
+
+        return $this->produtoModel->update($id, $data);
     }
 
-    public function delete($id)
+    public function delete(int|string $id): bool
     {
-        return $this->produtoModel->delete($id);    
+        return $this->produtoModel->delete($id);
     }
 
-    public function count()
+    public function count(): int
     {
         return $this->produtoModel->count();
     }
