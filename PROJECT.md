@@ -28,7 +28,7 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 **Foco:** CRUDs (Telas restritas aos gerentes e funcionários) para retroalimentar o sistema.
 - [ ] **Gestão de Categorias:** Listagem, inserção e exclusão (soft delete) das categorias de prateleira (Frios, Açougue, Mercearia).
 - [ ] **Gestão de Produtos:** Upload de Imagens no servidor, definição de preços e estoque, e vinculação com uma Categoria já cadastrada.
-- [ ] **Promoções (O "Folheto"):** Tela para escolher produtos existentes e aplicar a eles um `preco_promocional` agendando a `data_inicio` e a `data_fim`, além de definir a flag de `destaque_folheto`.
+- [x] **Promoções (O "Folheto"):** Tela para escolher produtos existentes e aplicar a eles um `preco_promocional` agendando a `data_inicio` e a `data_fim`, além de definir a flag de `destaque_folheto`.
 - [ ] **Acessos:** Tela para o Admin incluir, editar e bloquear acessos de `funcionarios` que gerenciarão a loja.
 
 ---

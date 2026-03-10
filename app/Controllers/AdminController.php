@@ -8,19 +8,23 @@ use App\DTOs\Admin\CategoriaDTO;
 use App\DTOs\Admin\EditCategoriaDTO;
 use App\DTOs\Admin\EditProdutoDTO;
 use App\DTOs\Admin\ProdutoDTO;
+use App\DTOs\Admin\PromocaoDTO;
 use App\Services\CategoriaService;
 use App\Services\ProdutoService;
+use App\Services\PromocaoService;
 use Core\Http\Response;
 
 class AdminController
 {
     private CategoriaService $categoriaService;
     private ProdutoService $produtoService;
+    private PromocaoService $promocaoService;
 
     public function __construct()
     {
         $this->categoriaService = app(CategoriaService::class);
         $this->produtoService   = app(ProdutoService::class);
+        $this->promocaoService  = app(PromocaoService::class);
     }
 
     public function dashboard(): mixed
@@ -159,7 +163,39 @@ class AdminController
 
     public function promocoes(): mixed
     {
-        return view('admin/promocoes/index');
+        $promocoes = $this->promocaoService->getAll();
+        $produtosList = $this->produtoService->getAll();
+        
+        return view('admin/promocoes/index', [
+            'promocoes' => $promocoes,
+            'produtosList' => $produtosList
+        ]);
+    }
+
+    public function promocoesStore(PromocaoDTO $dto): Response
+    {
+        try {
+            $this->promocaoService->create($dto);
+        } catch (\Exception $e) {
+            session()->set('error', 'Erro ao criar promoção: ' . $e->getMessage());
+            return Response::makeRedirect('/admin/promocoes');
+        }
+
+        session()->set('success', 'Promoção criada com sucesso!');
+        return Response::makeRedirect('/admin/promocoes');
+    }
+
+    public function promocoesDestroy(int|string $id): Response
+    {
+        try {
+            $this->promocaoService->delete($id);
+        } catch (\Exception $e) {
+            session()->set('error', 'Erro ao excluir promoção: ' . $e->getMessage());
+            return Response::makeRedirect('/admin/promocoes');
+        }
+
+        session()->set('success', 'Promoção excluída com sucesso!');
+        return Response::makeRedirect('/admin/promocoes');
     }
 
     public function acessos(): mixed

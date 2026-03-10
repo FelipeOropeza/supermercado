@@ -20,5 +20,7 @@ Route::group(['prefix' => '/admin', 'middleware' => 'admin'], function () {
     Route::post('/produtos/{id}/update', [AdminController::class, 'produtosUpdate'])->name('admin.produtos.update');
     Route::post('/produtos/{id}', [AdminController::class, 'produtosDestroy'])->name('admin.produtos.destroy');
     Route::get('/promocoes', [AdminController::class, 'promocoes'])->name('admin.promocoes.index');
+    Route::post('/promocoes', [AdminController::class, 'promocoesStore'])->name('admin.promocoes.store');
+    Route::post('/promocoes/{id}/destroy', [AdminController::class, 'promocoesDestroy'])->name('admin.promocoes.destroy');
     Route::get('/acessos', [AdminController::class, 'acessos'])->name('admin.acessos.index');
 });

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Configuração de Timezone
+date_default_timezone_set('America/Sao_Paulo');
+
 /*
 |--------------------------------------------------------------------------
 | Criando a Aplicação
