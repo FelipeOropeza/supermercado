@@ -88,10 +88,14 @@ class Handler
                     'errors' => $exception->errors
                 ], 422);
             } else {
-                session()->flash('_flash_errors', $exception->errors);
-                session()->flash('_flash_old', $exception->oldInput);
-                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+                session()->flash('errors', $exception->errors);
+                session()->flash('errors_origin', request()->path());
 
+                $cleanOld = array_filter($exception->oldInput, fn($v) => !($v instanceof \Core\Http\UploadedFile));
+                session()->flash('old', $cleanOld);
+                session()->flash('old_origin', request()->path());
+
+                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
                 return \Core\Http\Response::makeRedirect($referer);
             }
         }

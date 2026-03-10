@@ -87,7 +87,7 @@
     <!-- Modais de Erro Direto na Página (Fallback pra não perder preenchimento em validation error) -->
     <?php if (!empty(errors())): ?>
         <?php if (empty(old('id'))): ?>
-            <?= $this->include('admin/produtos/modals/create') ?>
+            <?= $this->include('admin/produtos/modals/create', ['categoriasList' => $categoriasList]) ?>
         <?php else: ?>
             <?php
             $produtoErro = (new \App\Services\ProdutoService())->getById(old('id'));

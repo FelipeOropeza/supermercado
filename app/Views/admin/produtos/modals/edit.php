@@ -21,7 +21,7 @@ $categoriasList = (new \App\Services\CategoriaService())->getAll();
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Produto</label>
-                    <input type="text" name="nome" placeholder="Ex: Arroz Tipo 1 - 5kg" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isEditingError ? old('nome') : htmlspecialchars($produto->nome) ?>" required>
+                    <input type="text" name="nome" placeholder="Ex: Arroz Tipo 1 - 5kg" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isEditingError ? old('nome') : e($produto->nome) ?>">
                     <?php if ($isEditingError && errors('nome')): ?>
                         <span class="text-red-500 text-xs mt-1 block"><?= errors('nome') ?></span>
                     <?php endif; ?>
@@ -29,13 +29,13 @@ $categoriasList = (new \App\Services\CategoriaService())->getAll();
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
-                    <select name="categoria_id" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer" required>
+                    <select name="categoria_id" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer">
                         <option value="">Selecione...</option>
                         <?php 
                         $currentCat = $isEditingError ? old('categoria_id') : $produto->categoria_id;
                         foreach($categoriasList as $cat): 
                         ?>
-                            <option value="<?= $cat->id ?>" <?= ($currentCat == $cat->id) ? 'selected' : '' ?>><?= htmlspecialchars($cat->nome) ?></option>
+                            <option value="<?= $cat->id ?>" <?= ($currentCat == $cat->id) ? 'selected' : '' ?>><?= e($cat->nome) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <?php if ($isEditingError && errors('categoria_id')): ?>
@@ -56,7 +56,7 @@ $categoriasList = (new \App\Services\CategoriaService())->getAll();
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Preço (R$)</label>
-                    <input type="number" step="0.01" name="preco" placeholder="0.00" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isEditingError ? old('preco') : $produto->preco ?>" required>
+                    <input type="number" step="0.01" name="preco" placeholder="0.00" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isEditingError ? old('preco') : $produto->preco ?>">
                     <?php if ($isEditingError && errors('preco')): ?>
                         <span class="text-red-500 text-xs mt-1 block"><?= errors('preco') ?></span>
                     <?php endif; ?>
@@ -64,15 +64,18 @@ $categoriasList = (new \App\Services\CategoriaService())->getAll();
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Estoque</label>
-                    <input type="number" name="estoque" placeholder="Qtd" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isEditingError ? old('estoque') : $produto->estoque ?>" required>
+                    <input type="number" name="estoque" placeholder="Qtd" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isEditingError ? old('estoque') : $produto->estoque ?>">
                     <?php if ($isEditingError && errors('estoque')): ?>
                         <span class="text-red-500 text-xs mt-1 block"><?= errors('estoque') ?></span>
                     <?php endif; ?>
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição Detalhada (Opcional)</label>
-                    <textarea name="descricao" rows="2" placeholder="Descreva brevemente..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"><?= $isEditingError ? old('descricao') : htmlspecialchars($produto->descricao) ?></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição Detalhada</label>
+                    <textarea name="descricao" rows="2" placeholder="Descreva brevemente..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"><?= $isEditingError ? old('descricao') : e($produto->descricao) ?></textarea>
+                    <?php if ($isEditingError && errors('descricao')): ?>
+                        <span class="text-red-500 text-xs mt-1 block"><?= errors('descricao') ?></span>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="md:col-span-2 flex items-center mt-2">

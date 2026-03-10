@@ -9,7 +9,7 @@ use Core\Http\Response;
 
 class AdminMiddleware implements MiddlewareInterface
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next):Response
     {
         $user = session('user');
 

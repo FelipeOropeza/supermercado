@@ -1,5 +1,6 @@
-<?php 
-$isCreatingError = empty(old('id')) && !empty(errors()); 
+<?php
+$isCreatingError = empty(old('id')) && !empty(errors());
+$categoriasList = $categoriasList ?? (new \App\Services\CategoriaService())->getAll();
 ?>
 <div id="modal-novo-produto" class="fixed inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden animate-fade-in-up">
@@ -15,11 +16,11 @@ $isCreatingError = empty(old('id')) && !empty(errors());
 
         <form action="<?= route('admin.produtos.store') ?>" method="POST" enctype="multipart/form-data" class="p-6">
             <?= csrf_field() ?>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Produto</label>
-                    <input type="text" name="nome" placeholder="Ex: Arroz Tipo 1 - 5kg" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isCreatingError ? old('nome') : '' ?>" required>
+                    <input type="text" name="nome" placeholder="Ex: Arroz Tipo 1 - 5kg" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isCreatingError ? old('nome') : '' ?>">
                     <?php if ($isCreatingError && errors('nome')): ?>
                         <span class="text-red-500 text-xs mt-1 block"><?= errors('nome') ?></span>
                     <?php endif; ?>
@@ -27,10 +28,10 @@ $isCreatingError = empty(old('id')) && !empty(errors());
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
-                    <select name="categoria_id" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer" required>
+                    <select name="categoria_id" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer">
                         <option value="">Selecione...</option>
-                        <?php foreach($categoriasList as $cat): ?>
-                            <option value="<?= $cat->id ?>" <?= ($isCreatingError && old('categoria_id') == $cat->id) ? 'selected' : '' ?>><?= htmlspecialchars($cat->nome) ?></option>
+                        <?php foreach ($categoriasList as $cat): ?>
+                            <option value="<?= $cat->id ?>" <?= ($isCreatingError && old('categoria_id') == $cat->id) ? 'selected' : '' ?>><?= e($cat->nome) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <?php if ($isCreatingError && errors('categoria_id')): ?>
@@ -48,7 +49,7 @@ $isCreatingError = empty(old('id')) && !empty(errors());
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Preço (R$)</label>
-                    <input type="number" step="0.01" name="preco" placeholder="0.00" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isCreatingError ? old('preco') : '' ?>" required>
+                    <input type="number" step="0.01" name="preco" placeholder="0.00" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isCreatingError ? old('preco') : '' ?>">
                     <?php if ($isCreatingError && errors('preco')): ?>
                         <span class="text-red-500 text-xs mt-1 block"><?= errors('preco') ?></span>
                     <?php endif; ?>
@@ -56,17 +57,20 @@ $isCreatingError = empty(old('id')) && !empty(errors());
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Estoque Inicial</label>
-                    <input type="number" name="estoque" placeholder="Qtd" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isCreatingError ? old('estoque') : '0' ?>" required>
+                    <input type="number" name="estoque" placeholder="Qtd" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= $isCreatingError ? old('estoque') : '0' ?>">
                     <?php if ($isCreatingError && errors('estoque')): ?>
                         <span class="text-red-500 text-xs mt-1 block"><?= errors('estoque') ?></span>
                     <?php endif; ?>
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição Detalhada (Opcional)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição Detalhada</label>
                     <textarea name="descricao" rows="2" placeholder="Descreva brevemente..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"><?= $isCreatingError ? old('descricao') : '' ?></textarea>
+                    <?php if ($isCreatingError && errors('descricao')): ?>
+                        <span class="text-red-500 text-xs mt-1 block"><?= errors('descricao') ?></span>
+                    <?php endif; ?>
                 </div>
-                
+
                 <div class="md:col-span-2 flex items-center mt-2">
                     <input type="checkbox" name="ativo" id="ativo-create" value="1" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" <?= (!$isCreatingError || old('ativo')) ? 'checked' : '' ?>>
                     <label for="ativo-create" class="ml-2 block text-sm text-gray-700 cursor-pointer">Produto Ativo (Visível na loja)</label>

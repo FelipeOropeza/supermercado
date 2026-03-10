@@ -93,7 +93,12 @@ class AdminController
     public function produtos(): mixed
     {
         $produtos = $this->produtoService->getAll();
-        return view('admin/produtos/index', ['produtos' => $produtos]);
+        $categoriasList = $this->categoriaService->getAll();
+
+        return view('admin/produtos/index', [
+            'produtos'       => $produtos,
+            'categoriasList' => $categoriasList,
+        ]);
     }
 
     public function produtosCreate(): mixed

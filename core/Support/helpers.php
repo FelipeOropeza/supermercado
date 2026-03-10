@@ -121,12 +121,20 @@ if (!function_exists('errors')) {
      */
     function errors(?string $field = null): mixed
     {
-        $errors = session('_flash_errors', []);
+        $origin = session('errors_origin', null);
+
+        // Se os erros vieram de outra página, ignora
+        if ($origin !== null && $origin !== request()->path()) {
+            return $field ? null : [];
+        }
+
+        $errors = session('errors', []);
+
         if ($field) {
-            // Em caso de array (vários erros num campo), pegamos o primeiro pra facilitar a view
             $fieldErrors = $errors[$field] ?? [];
             return is_array($fieldErrors) && !empty($fieldErrors) ? $fieldErrors[0] : null;
         }
+
         return $errors;
     }
 }
@@ -137,7 +145,13 @@ if (!function_exists('old')) {
      */
     function old(string $field, mixed $default = ''): mixed
     {
-        $oldInputs = session('_flash_old', []);
+        $origin = session('old_origin', null);
+
+        if ($origin !== null && $origin !== request()->path()) {
+            return $default;
+        }
+
+        $oldInputs = session('old', []);
         return $oldInputs[$field] ?? $default;
     }
 }

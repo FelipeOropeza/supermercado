@@ -15,14 +15,14 @@
             <!-- Nome -->
             <div>
                 <label class="block text-gray-700 text-sm font-semibold mb-2" for="nome">Nome Completo</label>
-                <input class="w-full px-4 py-3 rounded-lg border <?= errors('nome') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="nome" type="text" name="nome" value="<?= htmlspecialchars(old('nome')) ?>" placeholder="João Silva" required>
+                <input class="w-full px-4 py-3 rounded-lg border <?= errors('nome') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="nome" type="text" name="nome" value="<?= e(old('nome')) ?>" placeholder="João Silva" required>
                 <?php if ($error = errors('nome')): ?><p class="text-red-500 text-xs mt-1 font-medium"><?= $error ?></p><?php endif; ?>
             </div>
 
             <!-- Email -->
             <div>
                 <label class="block text-gray-700 text-sm font-semibold mb-2" for="email">E-mail</label>
-                <input class="w-full px-4 py-3 rounded-lg border <?= errors('email') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="email" type="email" name="email" value="<?= htmlspecialchars(old('email')) ?>" placeholder="voce@exemplo.com" required>
+                <input class="w-full px-4 py-3 rounded-lg border <?= errors('email') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="email" type="email" name="email" value="<?= e(old('email')) ?>" placeholder="voce@exemplo.com" required>
                 <?php if ($error = errors('email')): ?><p class="text-red-500 text-xs mt-1 font-medium"><?= $error ?></p><?php endif; ?>
             </div>
 
@@ -30,13 +30,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-2" for="cpf">CPF <span class="text-gray-400 font-normal">(Opcional)</span></label>
-                    <input class="w-full px-4 py-3 rounded-lg border <?= errors('cpf') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="cpf" type="text" name="cpf" value="<?= htmlspecialchars(old('cpf')) ?>" placeholder="000.000.000-00">
+                    <input class="w-full px-4 py-3 rounded-lg border <?= errors('cpf') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="cpf" type="text" name="cpf" value="<?= e(old('cpf')) ?>" placeholder="000.000.000-00">
                     <?php if ($error = errors('cpf')): ?><p class="text-red-500 text-xs mt-1 font-medium"><?= $error ?></p><?php endif; ?>
                 </div>
 
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-2" for="telefone">Telefone <span class="text-gray-400 font-normal">(Opcional)</span></label>
-                    <input class="w-full px-4 py-3 rounded-lg border <?= errors('telefone') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="telefone" type="text" name="telefone" value="<?= htmlspecialchars(old('telefone')) ?>" placeholder="(11) 90000-0000">
+                    <input class="w-full px-4 py-3 rounded-lg border <?= errors('telefone') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent' ?> transition" id="telefone" type="text" name="telefone" value="<?= e(old('telefone')) ?>" placeholder="(11) 90000-0000">
                     <?php if ($error = errors('telefone')): ?><p class="text-red-500 text-xs mt-1 font-medium"><?= $error ?></p><?php endif; ?>
                 </div>
             </div>

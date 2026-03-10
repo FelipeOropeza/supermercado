@@ -8,8 +8,15 @@ use Core\View\EngineInterface;
 
 abstract class Controller
 {
+    private EngineInterface $engine;
+
     public function __construct()
     {
-        // O engine é resolvido via helper global app() nos controllers filhos
+        $this->engine = app(EngineInterface::class);
+    }
+
+    protected function view(string $view, array $data = []): void
+    {
+        $this->engine->render($view, $data);
     }
 }

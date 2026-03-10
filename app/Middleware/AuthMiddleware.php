@@ -9,7 +9,7 @@ use Core\Http\Response;
 
 class AuthMiddleware implements MiddlewareInterface
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next):Response
     {
         if (!session()->has('user')) {
             if ($request->isHtmx()) {

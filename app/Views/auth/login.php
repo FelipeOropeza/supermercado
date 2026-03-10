@@ -11,7 +11,7 @@
 
         <?php if ($error = errors('email')): ?>
             <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6 text-sm" role="alert">
-                <?= htmlspecialchars($error) ?>
+                <?= e($error) ?>
             </div>
         <?php endif; ?>
 
@@ -21,7 +21,7 @@
             <div>
                 <label class="block text-gray-700 text-sm font-semibold mb-2" for="email">E-mail</label>
                 <div class="relative">
-                    <input class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" id="email" type="email" name="email" value="<?= htmlspecialchars(old('email')) ?>" placeholder="Seu email cadastrado" required>
+                    <input class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" id="email" type="email" name="email" value="<?= e(old('email')) ?>" placeholder="Seu email cadastrado" required>
                 </div>
             </div>
 

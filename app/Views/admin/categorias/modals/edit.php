@@ -24,7 +24,7 @@ $action = route('admin.categorias.update', ['id' => $idVal]);
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nome Oficial</label>
-                <input type="text" name="nome" id="edit-nome" placeholder="Ex: Mercearia, Padaria..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= htmlspecialchars((string)$nomeVal) ?>">
+                <input type="text" name="nome" id="edit-nome" placeholder="Ex: Mercearia, Padaria..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" value="<?= e($nomeVal) ?>">
                 <p class="text-xs text-gray-500 mt-2">Nome visível para os clientes do seu supermercado.</p>
                 <?php if ($isEditingError && errors('nome')): ?>
                     <span class="text-red-500 text-sm" id="edit-erro-nome"><?= errors('nome') ?></span>
@@ -33,7 +33,7 @@ $action = route('admin.categorias.update', ['id' => $idVal]);
 
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Descrição (Opcional)</label>
-                <textarea name="descricao" id="edit-descricao" rows="2" placeholder="Descreva brevemente esta categoria..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"><?= htmlspecialchars((string)$descVal) ?></textarea>
+                <textarea name="descricao" id="edit-descricao" rows="2" placeholder="Descreva brevemente esta categoria..." class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"><?= e($descVal) ?></textarea>
             </div>
 
             <div class="flex justify-end gap-3 mt-4">
