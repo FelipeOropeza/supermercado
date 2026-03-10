@@ -31,11 +31,8 @@ class Request
     protected function normalizeFiles(array $files): array
     {
         $normalized = [];
-
         foreach ($files as $key => $file) {
-            // Ignorar arrays de arquivos multiplos no momento, suportar apenas single upload
             if (isset($file['name'], $file['type'], $file['tmp_name'], $file['error'], $file['size']) && is_string($file['name'])) {
-                // Só empacota se realmente um arquivo foi enviado na request
                 if ($file['error'] !== UPLOAD_ERR_NO_FILE) {
                     $normalized[$key] = new UploadedFile(
                         $file['tmp_name'],
@@ -47,7 +44,6 @@ class Request
                 }
             }
         }
-
         return $normalized;
     }
 
@@ -73,14 +69,12 @@ class Request
     public function all(): array
     {
         $contentType = $this->server['CONTENT_TYPE'] ?? '';
-
         if (str_contains($contentType, 'application/json')) {
             $json = json_decode($this->content, true);
             if (is_array($json)) {
-                return $json; // APIs não enviam $_FILES via JSON puro, então apenas retornamos o json
+                return $json;
             }
         }
-
         return array_merge($this->query, $this->post, $this->files);
     }
 
@@ -98,12 +92,14 @@ class Request
     public function path(): string
     {
         $uri = parse_url($this->server['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-        $scriptName = dirname($this->server['SCRIPT_NAME'] ?? '');
+        $scriptName = str_replace('\\', '/', dirname($this->server['SCRIPT_NAME'] ?? ''));
+        if ($scriptName === '\\' || $scriptName === '.') {
+            $scriptName = '/';
+        }
 
         if ($scriptName !== '/' && strpos((string) $uri, (string) $scriptName) === 0) {
             $uri = substr((string) $uri, strlen((string) $scriptName));
         }
-
         return '/' . trim((string) $uri, '/');
     }
 
@@ -114,8 +110,15 @@ class Request
     {
         $accept = $this->server['HTTP_ACCEPT'] ?? '';
         $contentType = $this->server['CONTENT_TYPE'] ?? '';
-
         return str_contains($accept, 'application/json') || str_contains($contentType, 'application/json');
+    }
+
+    /**
+     * Verifica se a requisição é direcionada para a API baseada no path ou headers.
+     */
+    public function isApi(): bool
+    {
+        return str_starts_with($this->path(), '/api') || $this->wantsJson();
     }
 
     /**
@@ -145,10 +148,37 @@ class Request
     }
 
     /**
-     * Verifica se a requisição é AJAX clássico (jQuery/Fetch com header padrão)
+     * Verifica se a requisição foi feita via AJAX (XMLHttpRequest)
      */
     public function isAjax(): bool
     {
         return isset($this->server['HTTP_X_REQUESTED_WITH']) && $this->server['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+    }
+
+    /**
+     * Retorna o valor de um cabeçalho da requisição.
+     * Verifica $_SERVER primeiro, depois getallheaders() como fallback.
+     * Necessário pois o servidor embutido do PHP não repassa HTTP_AUTHORIZATION via $_SERVER.
+     */
+    public function header(string $key, mixed $default = null): mixed
+    {
+        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
+
+        if (isset($this->server[$serverKey])) {
+            return $this->server[$serverKey];
+        }
+
+        // Fallback: lê os headers reais via getallheaders() (funciona no CLI e Apache)
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+            // Busca case-insensitive
+            foreach ($headers as $name => $value) {
+                if (strcasecmp($name, $key) === 0) {
+                    return $value;
+                }
+            }
+        }
+
+        return $default;
     }
 }

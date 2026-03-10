@@ -39,14 +39,12 @@ if (!function_exists('app')) {
 if (!function_exists('response')) {
     /**
      * Helper global para a classe Response.
+     * IMPORTANTE: Sempre retorna uma nova instância — nunca reutiliza estado entre requisições.
+     * Essencial para modo Worker (FrankenPHP) onde o processo não morre entre requests.
      */
-    function response(): Response
+    function response(string $content = '', int $status = 200, array $headers = []): Response
     {
-        static $response = null;
-        if ($response === null) {
-            $response = new Response();
-        }
-        return $response;
+        return new Response($content, $status, $headers);
     }
 }
 
@@ -256,5 +254,99 @@ if (!function_exists('storage_url')) {
         }
 
         return '/storage/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('e')) {
+    /**
+     * Escapa caracteres especiais HTML para exibição segura nas Views.
+     * SEMPRE use este helper ao imprimir dados do usuário: <?= e($variavel) ?>
+     * Não use no Validator (que é camada de entrada) — só na saída/View.
+     */
+    function e(mixed $value): string
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+}
+
+if (!function_exists('abort')) {
+    /**
+     * Lança uma exceção HTTP para interromper a request com um código de status.
+     * Ex: abort(404), abort(403, 'Sem permissão')
+     *
+     * @param  int    $code    Código HTTP (403, 404, 500, etc.)
+     * @param  string $message Mensagem opcional de erro
+     * @throws \Core\Exceptions\HttpException Sempre lançada — esta função nunca retorna normalmente.
+     */
+    function abort(int $code, string $message = ''): void
+    {
+        $defaultMessages = [
+            400 => 'Bad Request',
+            401 => 'Não autenticado.',
+            403 => 'Acesso negado.',
+            404 => 'Não encontrado.',
+            405 => 'Método não permitido.',
+            422 => 'Entidade não processável.',
+            429 => 'Muitas requisições.',
+            500 => 'Erro interno do servidor.',
+            503 => 'Serviço indisponível.',
+        ];
+
+        $msg = $message ?: ($defaultMessages[$code] ?? 'Erro.');
+
+        throw new \Core\Exceptions\HttpException($msg, $code);
+    }
+}
+
+if (!function_exists('redirect')) {
+    /**
+     * Retorna uma Response de redirecionamento imediato.
+     * Ex: return redirect('/login'); return redirect(route('home'));
+     */
+    function redirect(string $url, int $status = 302): Response
+    {
+        return Response::makeRedirect($url, $status);
+    }
+}
+
+if (!function_exists('mailer')) {
+    /**
+     * Facilita o envio de e-mails.
+     * Uso: mailer()->to('user@test.com')->subject('Oi')->body('Conteúdo')->send();
+     */
+    function mailer(): \Core\Mail\MailerInterface
+    {
+        return \Core\Mail\MailManager::driver();
+    }
+}
+if (!function_exists('pluralize')) {
+    /**
+     * Helper extremamente básico para pluralizar nomes de Models em tabelas.
+     * Ex: User -> users, Categoria -> categorias (pt-BR amigável básico)
+     */
+    function pluralize(string $singular): string
+    {
+        $lastLetter = strtolower(substr($singular, -1));
+        $lastTwo    = strtolower(substr($singular, -2));
+
+        // ch, sh, ss → es (ex: Church → Churches, Address → Addresses)
+        if (in_array($lastTwo, ['ch', 'sh', 'ss'])) return $singular . 'es';
+
+        // y → verifica letra anterior: consoante = ies, vogal = ys (ex: Category → Categories, Boy → Boys)
+        if ($lastLetter === 'y') {
+            $beforeY = strtolower(substr($singular, -2, 1));
+            return in_array($beforeY, ['a', 'e', 'i', 'o', 'u'])
+                ? $singular . 's'
+                : substr($singular, 0, -1) . 'ies';
+        }
+
+        // vogais → s (ex: Categoria → Categorias, Produto → Produtos)
+        if (in_array($lastLetter, ['a', 'e', 'i', 'o', 'u'])) return $singular . 's';
+
+        // x, r, z → es (ex: Flux → Fluxes, Fornecedor → Fornecedores, Capaz → Capazes)
+        if (in_array($lastLetter, ['x', 'r', 'z'])) return $singular . 'es';
+
+        // padrão → s (ex: User → Users, Animal → Animals)
+        return $singular . 's';
     }
 }

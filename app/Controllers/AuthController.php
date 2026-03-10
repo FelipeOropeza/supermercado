@@ -28,6 +28,9 @@ class AuthController
     {
         $usuario = $this->authService->login($dto);
 
+        // Regenera o ID da sessão para prevenir Session Fixation (OWASP A2)
+        session()->regenerate();
+
         // Armazena na sessão
         session()->set('user', [
             'id' => $usuario->id,

@@ -14,14 +14,18 @@ class AdminMiddleware implements MiddlewareInterface
         $user = session('user');
 
         if (!$user || ($user['role'] ?? '') !== 'admin') {
-            if ($request->isAjax() || $request->isHtmx()) {
+            if ($request->isApi()) {
                 return Response::makeJson(['error' => 'Acesso restrito apenas para administradores.'], 403);
             }
 
-            fail_validation('auth', 'Você não tem permissão para acessar esta área.');
-            return Response::makeRedirect('/login');
+            if ($request->isHtmx()) {
+                return (new Response('', 403))->hxRedirect('/login');
+            }
+
+            abort(403, 'Você não tem permissão para acessar esta área.');
         }
 
         return $next($request);
     }
 }
+

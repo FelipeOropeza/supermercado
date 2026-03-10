@@ -13,11 +13,15 @@ class QueryBuilder
     protected string $class;
 
     protected array $wheres = [];
+    protected array $orWheres = [];
     protected array $params = [];
     protected array $joins = [];
     protected string $selects = '*';
     protected ?int $limit = null;
+    protected ?int $offset = null;
     protected string $orderBy = '';
+    protected string $groupBy = '';
+    protected string $having = '';
     protected array $with = [];
 
     public function __construct(PDO $db, string $table, string $class)
@@ -98,6 +102,50 @@ class QueryBuilder
         return $this;
     }
 
+    public function orWhere(string $column, string $operator, mixed $value = null): self
+    {
+        if ($value === null) {
+            $value   = $operator;
+            $operator = '=';
+        }
+
+        $paramName = str_replace('.', '_', $column) . '_or_' . count($this->params);
+        $this->orWheres[] = "$column $operator :$paramName";
+        $this->params[$paramName] = $value;
+
+        return $this;
+    }
+
+    public function orWhereIn(string $column, array $values): self
+    {
+        if (empty($values)) {
+            return $this;
+        }
+
+        $placeholders = [];
+        foreach ($values as $index => $value) {
+            $paramName = str_replace('.', '_', $column) . '_orin_' . count($this->params) . '_' . $index;
+            $placeholders[] = ":$paramName";
+            $this->params[$paramName] = $value;
+        }
+
+        $this->orWheres[] = "$column IN (" . implode(', ', $placeholders) . ")";
+
+        return $this;
+    }
+
+    public function groupBy(string $column): self
+    {
+        $this->groupBy = "GROUP BY $column";
+        return $this;
+    }
+
+    public function having(string $condition): self
+    {
+        $this->having = "HAVING $condition";
+        return $this;
+    }
+
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
         $this->orderBy = "ORDER BY $column $direction";
@@ -108,6 +156,32 @@ class QueryBuilder
     {
         $this->limit = $limit;
         return $this;
+    }
+
+    public function offset(int $offset): self
+    {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    /**
+     * Monta a cláusula WHERE consolidando AND e OR corretamente.
+     */
+    protected function buildWhere(): string
+    {
+        if (empty($this->wheres) && empty($this->orWheres)) {
+            return '';
+        }
+
+        $andPart = implode(' AND ', $this->wheres);
+        $orPart  = implode(' OR ', $this->orWheres);
+
+        if ($andPart && $orPart) {
+            // Agrupa o OR para não vazar sem o AND
+            return " WHERE ($andPart) OR ($orPart)";
+        }
+
+        return ' WHERE ' . ($andPart ?: $orPart);
     }
 
     /**
@@ -121,8 +195,14 @@ class QueryBuilder
             $sql .= ' ' . implode(' ', $this->joins);
         }
 
-        if (!empty($this->wheres)) {
-            $sql .= " WHERE " . implode(' AND ', $this->wheres);
+        $sql .= $this->buildWhere();
+
+        if ($this->groupBy !== '') {
+            $sql .= ' ' . $this->groupBy;
+        }
+
+        if ($this->having !== '') {
+            $sql .= ' ' . $this->having;
         }
 
         if ($this->orderBy !== '') {
@@ -131,6 +211,10 @@ class QueryBuilder
 
         if ($this->limit !== null) {
             $sql .= " LIMIT {$this->limit}";
+        }
+
+        if ($this->offset !== null) {
+            $sql .= " OFFSET {$this->offset}";
         }
 
         $stmt = $this->db->prepare($sql);
@@ -146,6 +230,39 @@ class QueryBuilder
     }
 
     /**
+     * Pagina os resultados retornando dados + metadados de paginação.
+     *
+     * @param int $perPage Registros por página
+     * @param int $page    Página atual (padrão: lida de ?page= na URL)
+     * @return array{data: array, total: int, per_page: int, current_page: int, last_page: int, from: int, to: int}
+     */
+    public function paginate(int $perPage = 15, ?int $page = null): array
+    {
+        $page = $page ?? max(1, (int) ($_GET['page'] ?? 1));
+
+        $total = $this->count();
+
+        $results = $this
+            ->limit($perPage)
+            ->offset(($page - 1) * $perPage)
+            ->get();
+
+        $lastPage = (int) ceil($total / $perPage);
+        $from     = $total > 0 ? ($page - 1) * $perPage + 1 : 0;
+        $to       = min($page * $perPage, $total);
+
+        return [
+            'data'         => $results,
+            'total'        => $total,
+            'per_page'     => $perPage,
+            'current_page' => $page,
+            'last_page'    => max(1, $lastPage),
+            'from'         => $from,
+            'to'           => $to,
+        ];
+    }
+
+    /**
      * Retorna a contagem de registros baseada nos filtros aplicados.
      */
     public function count(string $column = '*'): int
@@ -156,14 +273,29 @@ class QueryBuilder
             $sql .= ' ' . implode(' ', $this->joins);
         }
 
-        if (!empty($this->wheres)) {
-            $sql .= " WHERE " . implode(' AND ', $this->wheres);
+        $sql .= $this->buildWhere();
+
+        if ($this->groupBy !== '') {
+            $sql .= ' ' . $this->groupBy;
         }
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($this->params);
 
         return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Executa um DELETE condicional baseado nos filtros WHERE encadeados.
+     * Ex: $model->where('usuario_id', '=', 1)->where('id', '=', 5)->delete();
+     */
+    public function delete(): bool
+    {
+        $sql = "DELETE FROM {$this->table}";
+        $sql .= $this->buildWhere();
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($this->params);
     }
 
     /**
@@ -176,29 +308,10 @@ class QueryBuilder
         return $results[0] ?? null;
     }
 
-    /**
-     * Executa um DELETE com os filtros WHERE acumulados.
-     * Ex: $model->where('usuario_id', '=', 1)->where('id', '=', 5)->delete();
-     */
-    public function delete(): bool
-    {
-        $sql = "DELETE FROM {$this->table}";
-
-        if (!empty($this->wheres)) {
-            $sql .= " WHERE " . implode(' AND ', $this->wheres);
-        }
-
-        $stmt = $this->db->prepare($sql);
-
-        return $stmt->execute($this->params);
-    }
-
     protected function eagerLoadRelations(array $models): array
     {
         $first = $models[0];
 
-        // ⚠️ Nota: eagerLoadRelations suporta apenas belongsTo e hasMany no momento.
-        // O suporte para hasOne não foi implementado e será ignorado se tentado.
         foreach ($this->with as $relationMethod) {
             if (!method_exists($first, $relationMethod)) {
                 continue;
@@ -252,6 +365,28 @@ class QueryBuilder
                 foreach ($models as $m) {
                     $val = $m->{$def->localKey};
                     $m->setRelation($relationMethod, $dictionary[$val] ?? []);
+                }
+            } elseif ($def->type === 'hasOne') {
+                $ids = [];
+                foreach ($models as $m) {
+                    $val = $m->{$def->localKey};
+                    if ($val !== null && !in_array($val, $ids)) {
+                        $ids[] = $val;
+                    }
+                }
+
+                if (empty($ids)) continue;
+
+                $relatedModels = (new $def->relatedClass())->whereIn($def->foreignKey, $ids)->get();
+
+                $dictionary = [];
+                foreach ($relatedModels as $r) {
+                    $dictionary[$r->{$def->foreignKey}] = $r;
+                }
+
+                foreach ($models as $m) {
+                    $val = $m->{$def->localKey};
+                    $m->setRelation($relationMethod, $dictionary[$val] ?? null);
                 }
             }
         }

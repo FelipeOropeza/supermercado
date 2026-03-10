@@ -34,7 +34,7 @@ abstract class Model
         if ($this->table === null) {
             $classPath = explode('\\', static::class);
             $className = end($classPath);
-            $this->table = strtolower($className) . 's'; // Muito básico, idealmente seria pluralizador
+            $this->table = pluralize(strtolower($className));
         }
     }
 
@@ -165,8 +165,29 @@ abstract class Model
     }
 
     /**
+     * Busca um registro pelo seu ID ou lança uma HttpException 404.
+     *
+     * @param mixed $id
+     * @return static
+     * @throws \Core\Exceptions\HttpException
+     */
+    public function findOrFail(mixed $id): static
+    {
+        $result = $this->find($id);
+
+        if ($result === null) {
+            throw new \Core\Exceptions\HttpException(
+                'Registro não encontrado.',
+                404
+            );
+        }
+
+        return $result;
+    }
+
+    /**
      * Insere um novo registro no banco de dados
-     * 
+     *
      * @param array $data Ex: ['nome' => 'Felipe', 'email' => 'felipe@etc.com']
      * @return int O ID inserido
      */
@@ -180,7 +201,7 @@ abstract class Model
             $data['updated_at'] = $now;
         }
 
-        $columns = implode(', ', array_keys($data));
+        $columns = '`' . implode('`, `', array_keys($data)) . '`';
         // Cria os placeholders (:nome, :email)
         $placeholders = ':' . implode(', :', array_keys($data));
 
@@ -199,7 +220,7 @@ abstract class Model
 
     /**
      * Atualiza um registro existente
-     * 
+     *
      * @param mixed $id
      * @param array $data Ex: ['nome' => 'Felipe 2']
      * @return bool
@@ -214,15 +235,17 @@ abstract class Model
 
         $fields = [];
         foreach ($data as $key => $value) {
-            $fields[] = "{$key} = :{$key}";
+            // Backticks protegem nomes de colunas contra SQL injection via chave do array
+            $fields[] = "`{$key}` = :{$key}";
         }
         $fieldsStr = implode(', ', $fields);
 
-        $sql = "UPDATE {$this->table} SET {$fieldsStr} WHERE {$this->primaryKey} = :id";
+        // Usa :__pk_id para evitar conflito se $data tiver uma chave 'id'
+        $sql = "UPDATE {$this->table} SET {$fieldsStr} WHERE {$this->primaryKey} = :__pk_id";
 
         $stmt = $this->db->prepare($sql);
 
-        $stmt->bindValue(':id', $id);
+        $stmt->bindValue(':__pk_id', $id);
         foreach ($data as $key => $value) {
             $stmt->bindValue(':' . $key, $value);
         }
@@ -353,16 +376,61 @@ abstract class Model
     }
 
     /**
+     * Relacionamento 1:1 - Esta Model "Tem Um" Outro.
+     * Ex: $usuario->endereco() >> hasOne(Endereco::class, 'usuario_id')
+     */
+    protected function hasOne(string $relatedClass, string $foreignKey, string $localKey = 'id'): mixed
+    {
+        if ($this->relationDefinitionMode) {
+            return new RelationDefinition('hasOne', $relatedClass, $foreignKey, $localKey);
+        }
+
+        $related = new $relatedClass();
+
+        if ($this->$localKey === null) {
+            return null;
+        }
+
+        return $related->where($foreignKey, '=', $this->$localKey)->first();
+    }
+
+    /**
      * Filtra os dados de entrada usando o Mass Assignment (lista $fillable).
      */
     protected function filterFillable(array $data): array
     {
-        // Se a classe não definiu o $fillable, por retrocompatibilidade a gente aceita tudo. 
-        // Idealmente futuramente podemos até lançar Exception se estiver vazio para forçar as boas práticas.
         if (empty($this->fillable)) {
-            return $data;
+            // Em modo debug, avisa o desenvolvedor que nenhuma coluna será aceita sem $fillable
+            if (function_exists('env') && env('APP_DEBUG', false)) {
+                trigger_error(
+                    static::class . ': Tentativa de Mass Assignment sem $fillable definido. Todos os campos foram bloqueados por segurança.',
+                    E_USER_NOTICE
+                );
+            }
+            return [];
         }
 
         return array_intersect_key($data, array_flip($this->fillable));
+    }
+
+    /**
+     * Executa operações dentro de uma transação de banco de dados.
+     * Commita em sucesso, faz rollback em qualquer exceção.
+     *
+     * Uso:
+     *   $model->transaction(function() use ($pedidoData, $itensPedido) {
+     *       $pedidoId = (new Pedido())->insert($pedidoData);
+     *       foreach ($itensPedido as $item) {
+     *           (new ItemPedido())->insert($item + ['pedido_id' => $pedidoId]);
+     *       }
+     *       return $pedidoId;
+     *   });
+     *
+     * @param callable $callback
+     * @return mixed Valor retornado pelo callback
+     */
+    public function transaction(callable $callback): mixed
+    {
+        return \Core\Database\Connection::transaction($callback);
     }
 }

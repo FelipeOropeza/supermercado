@@ -212,7 +212,10 @@ class Router
         $method = $request->server['REQUEST_METHOD'] ?? 'GET';
 
         // Tenta detectar se estamos rodando em um subdiretório
-        $scriptName = dirname($request->server['SCRIPT_NAME'] ?? '');
+        $scriptName = str_replace('\\', '/', dirname($request->server['SCRIPT_NAME'] ?? ''));
+        if ($scriptName === '\\' || $scriptName === '.') {
+            $scriptName = '/';
+        }
 
         // Se o scriptName não for apenas '/' (root), removemos ele da URI
         if ($scriptName !== '/' && strpos((string) $uri, (string) $scriptName) === 0) {
@@ -272,27 +275,16 @@ class Router
                 if (is_array($action) && isset($action['factory']) && is_callable($action['factory'])) {
                     $controllerInstance = $action['factory']();
                     // Invoca os métodos utilizando Reflection leve apenas para parametros de injeção da rota
-                    $result = $container->call([$controllerInstance, $action['method']], $params);
-                } elseif (is_callable($action) && !is_array($action)) {
-                    // Se a ação já for um callable simples (Closure)
-                    $result = call_user_func_array($action, array_values($params));
-                } else {
-                    // O Action Controller puro
-                    $result = $container->call($action, $params);
+                    return $container->call([$controllerInstance, $action['method']], $params);
                 }
 
-                // Normaliza o retorno para Response dentro do destination.
-                // Isso garante que Middlewares com type-hint (ex: : Response) não quebrem
-                // quando o Controller retorna apenas uma string ou array.
-                if ($result instanceof \Core\Http\Response) {
-                    return $result;
+                // Se a ação já for um callable simples (Closure)
+                if (is_callable($action) && !is_array($action)) {
+                    return call_user_func_array($action, array_values($params));
                 }
 
-                if (is_array($result) || is_object($result)) {
-                    return \Core\Http\Response::makeJson($result);
-                }
-
-                return new \Core\Http\Response((string) $result);
+                // O Action Controller puro
+                return $container->call($action, $params);
             }; // Fim da destination / Action Controller
 
 
@@ -323,7 +315,16 @@ class Router
                 ->through($resolvedMiddlewares)
                 ->then($destination);
 
-            return $result;
+            // Garante que o retorno seja sempre um objeto Core\Http\Response
+            if ($result instanceof \Core\Http\Response) {
+                return $result;
+            }
+
+            if (is_array($result) || is_object($result)) {
+                return \Core\Http\Response::makeJson($result);
+            }
+
+            return new \Core\Http\Response((string) $result);
         }
 
         // 404 handling simples

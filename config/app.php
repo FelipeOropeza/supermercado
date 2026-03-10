@@ -11,16 +11,14 @@ return [
      */
     'paths' => [
         'controllers' => __DIR__ . '/../app/Controllers',
-        'models' => __DIR__ . '/../app/Models',
+        'models'      => __DIR__ . '/../app/Models',
         'middlewares' => __DIR__ . '/../app/Middleware',
-        'views' => __DIR__ . '/../app/Views',
-        'migrations' => __DIR__ . '/../database/migrations',
-        'services' => __DIR__ . '/../app/Services',
-        'dtos' => __DIR__ . '/../app/DTOs',
-        'seeders' => __DIR__ . '/../database/seeders',
+        'views'       => __DIR__ . '/../app/Views',
+        'migrations'  => __DIR__ . '/../database/migrations',
+        'services'    => __DIR__ . '/../app/Services',
 
         // Caminho físico dos templates usados pelos comandos do Console
-        'templates' => __DIR__ . '/../core/Console/Templates',
+        'templates'   => __DIR__ . '/../core/Console/Templates',
     ],
 
     /*
@@ -32,11 +30,11 @@ return [
      |
      */
     'app' => [
-        'name' => 'MVC Base Project',
+        'name'          => 'Supermercado Online',
         // Motores suportados: 'php' ou 'twig'
-        'view_engine' => 'php',
+        'view_engine'   => 'php',
         // Rota padrão do redirecionamento raiz, caso configurado
-        'default_route' => getenv('APP_DEFAULT_ROUTE') ?: '/',
+        'default_route' => '/',
     ],
 
     /*

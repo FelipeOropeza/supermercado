@@ -53,12 +53,6 @@ class Blueprint
         return $this->addColumn($name, 'TIMESTAMP');
     }
 
-    public function timestamps(): void
-    {
-        $this->timestamp('created_at')->nullable();
-        $this->timestamp('updated_at')->nullable();
-    }
-
     public function date(string $name): ColumnDefinition
     {
         return $this->addColumn($name, 'DATE');
@@ -72,6 +66,12 @@ class Blueprint
     public function softDeletes(): void
     {
         $this->timestamp('deleted_at')->nullable();
+    }
+
+    public function timestamps(): void
+    {
+        $this->timestamp('created_at')->nullable();
+        $this->timestamp('updated_at')->nullable();
     }
 
     protected function addColumn(string $name, string $type, ?string $length = null): ColumnDefinition

@@ -59,6 +59,9 @@ class Kernel
             case 'setup:auth':
                 $this->setupAuth($args);
                 break;
+            case 'setup:api':
+                $this->setupApi($args);
+                break;
             case 'optimize':
                 $this->optimizeApp($args);
                 break;
@@ -77,8 +80,14 @@ class Kernel
             case 'make:component':
                 $this->makeComponent($args);
                 break;
-            case 'serve':
-                $this->serveApp($args);
+            case 'queue:work':
+                $this->queueWork($args);
+                break;
+            case 'make:job':
+                $this->makeJob($args);
+                break;
+            case 'db:seed':
+                $this->dbSeed($args);
                 break;
             default:
                 echo "Erro: Comando não reconhecido: '$command'\n";
@@ -89,29 +98,38 @@ class Kernel
 
     private function showHelp(): void
     {
-        echo "MVC Base Console\n";
-        echo "=================\n";
+        echo "Forge CLI Engine (v4.0.0)\n";
+        echo "========================================\n";
         echo "Uso: forge [comando] ou php forge [comando]\n\n";
-        echo "Comandos disponíveis:\n";
+
+        echo "🚀 Geradores (Scaffolding):\n";
         echo "  make:controller <Nome>   Cria um novo Controller\n";
         echo "  make:model <Nome>        Cria um novo Model\n";
-        echo "  make:view <Nome>         Cria uma nova View automaticamente na extensão correta\n";
-        echo "  make:service <Nome>      Cria um novo Service de regra de negócio para injetar. Ex: UserService\n";
-        echo "  make:migration <Nome>    Cria uma nova Migration de Banco de Dados. Ex: CreateUsersTable\n";
-        echo "  make:middleware <Nome>   Cria um novo Middleware de validação. Ex: AuthMiddleware\n";
-        echo "  make:rule <Nome>         Cria um atributo de Validação customizado. Ex: CpfValido\n";
-        echo "  make:mutator <Nome>      Cria um atributo de Mutação customizado. Ex: LimpaCpf\n";
-        echo "  migrate                  Gera o Banco de Dados ausente (se possível) e roda as Migrations\n";
-        echo "  setup:engine <php|twig>  Muda o motor padrão do projeto e limpa views não utilizadas\n";
-        echo "  setup:auth               Instala o scaffolding completo de Autenticação (Login, Registro, DB)\n";
-        echo "  optimize                 Compila as rotas e dependências para máxima performance\n";
-        echo "  optimize:clear           Remove os arquivos de cache compilados\n";
-        echo "  make:dto <Nome>          Cria um Data Transfer Object. Ex: Admin/LoginDTO\n";
-        echo "  make:seeder <Nome>       Cria uma nova classe de Seeder. Ex: DatabaseSeeder\n";
-        echo "  db:seed [Nome]           Executa o seeder especificado ou a classe DatabaseSeeder\n";
-        echo "  migrate:refresh          Desfaz todas as migrations e re-executa do zero\n";
-        echo "  make:component <Nome>    Cria um novo Componente HTMX reativo. Ex: table_users\n";
-        echo "  serve                    Inicia o servidor de desenvolvimento local\n";
+        echo "  make:view <Nome>         Cria uma nova View automaticamente\n";
+        echo "  make:component <Nome>    Cria um componente HTMX reativo\n";
+        echo "  make:service <Nome>      Cria um Service de regra de negócio\n";
+        echo "  make:migration <Nome>    Cria uma nova Migration de Banco de Dados\n";
+        echo "  make:middleware <Nome>   Cria um novo Middleware de validação\n";
+        echo "  make:rule <Nome>         Cria um atributo de Validação customizado\n";
+        echo "  make:mutator <Nome>      Cria um atributo de Mutação customizado\n";
+        echo "  make:dto <Nome>          Cria um Data Transfer Object\n";
+        echo "  make:seeder <Nome>       Cria uma nova classe de Seeder\n";
+        echo "  make:job <Nome>          Cria uma nova classe de Job para Fila\n\n";
+
+        echo "🗄️ Banco de Dados:\n";
+        echo "  migrate                  Gera o banco e executa migrations pendentes\n";
+        echo "  migrate:refresh          Reseta o banco e re-executa todas as migrations\n";
+        echo "  db:seed [Nome]           Popula o banco com seeders\n\n";
+
+        echo "🛠️ Instalação & Setup:\n";
+        echo "  setup:engine <php|twig>  Altera o motor de visualização padrão\n";
+        echo "  setup:auth               Gera sistema de Autenticação Web (Session)\n";
+        echo "  setup:api                Gera sistema de Autenticação API (JWT)\n\n";
+
+        echo "⚡ Performance & Operação:\n";
+        echo "  queue:work [fila]        Inicia o worker para processar jobs da fila\n";
+        echo "  optimize                 Gera cache de rotas e otimiza o container\n";
+        echo "  optimize:clear           Limpa todos os caches de performance\n";
     }
 
     private function makeMigration(array $args): void
@@ -574,15 +592,15 @@ class Kernel
             echo "✅ Migration: Tabela de 'usuarios' criada.\n";
         }
 
-        // 4.9 AdminMiddleware (Permissões)
+        // 4.9 AuthMiddleware (Verificação de Login)
         $middlewareDir = $this->config['paths']['middlewares'] ?? $baseDir . '/app/Middleware';
         if (!is_dir($middlewareDir)) mkdir($middlewareDir, 0777, true);
-        
-        $adminMiddlewarePath = $middlewareDir . '/AdminMiddleware.php';
-        if (!file_exists($adminMiddlewarePath)) {
-            $code = file_get_contents("$authTemplatesDir/admin_middleware.stub");
-            file_put_contents($adminMiddlewarePath, $code);
-            echo "✅ Middleware: AdminMiddleware para permissões criado.\n";
+
+        $authMiddlewarePath = $middlewareDir . '/AuthMiddleware.php';
+        if (!file_exists($authMiddlewarePath)) {
+            $code = file_get_contents("$authTemplatesDir/auth_middleware.stub");
+            file_put_contents($authMiddlewarePath, $code);
+            echo "✅ Middleware: AuthMiddleware de sessão criado.\n";
         }
 
         // 5. Views
@@ -733,7 +751,6 @@ class Kernel
 
                     $pdoApp->exec("TRUNCATE TABLE migrations");
                     echo "\n✅ Rollback completado.\n\n";
-
                 } else {
                     echo "Nenhuma migration rodada detectada para rollback.\n\n";
                 }
@@ -865,14 +882,14 @@ class Kernel
         // Certifica compatibilidade de views PHP
         $engine = $this->config['app']['view_engine'] ?? 'php';
         $extension = $engine === 'twig' ? '.twig' : '.php';
-        
+
         $fileName = str_ends_with($name, $extension) ? $name : $name . $extension;
         $classNameRaw = str_replace($extension, '', $fileName);
 
         // Preparamos a pasta 'components' dentro de 'views' globalmente
         $viewsDir = rtrim($this->config['paths']['views'], '/');
         $componentsDir = $viewsDir . '/components';
-        
+
         if (!is_dir($componentsDir)) {
             mkdir($componentsDir, 0777, true);
         }
@@ -895,72 +912,186 @@ class Kernel
         $content = str_replace('{{className}}', $classNameRaw, $content);
 
         file_put_contents($path, $content);
-        
+
         echo "✅ Componente HTMX '$fileName' criado em: app/Views/components/$fileName\n";
         echo "💡 Dica de uso na View: include('components/{$classNameRaw}') \n";
     }
 
-    private function serveApp(array $args): void
+    private function queueWork(array $args): void
     {
-        // 1. Configurações
-        $port = env('APP_PORT', 8000);
-        $host = env('APP_HOST', 'localhost');
-        $defaultRoute = ltrim((string)env('APP_DEFAULT_ROUTE', ''), '/');
+        $queue = $args[1] ?? 'default';
+        $once = in_array('--once', $args);
 
-        foreach ($args as $arg) {
-            if (strpos($arg, '--port=') === 0) $port = (int) substr($arg, 7);
-            if (strpos($arg, '--host=') === 0) $host = substr($arg, 7);
-        }
+        echo "Worker iniciado para a fila: [{$queue}]" . ($once ? " (Modo único)" : "") . "\n";
+        echo "Pressione Ctrl+C para parar.\n";
 
-        $fullUrl = "http://{$host}:{$port}/{$defaultRoute}";
+        while (true) {
+            try {
+                $job = \Core\Queue\QueueManager::pop($queue);
 
-        // 2. UI
-        echo "\n";
-        echo "\033[1;34m=======================================================\033[0m\n";
-        echo " 🚀 \033[32mServidor de Desenvolvimento MVC Base Iniciado!\033[0m \n";
-        echo "\033[1;34m=======================================================\033[0m\n";
-        echo " 🔗 Acesse a aplicação clicando no link abaixo:\n";
-        echo " 👉 \033[1;4;32m{$fullUrl}\033[0m\n";
-        echo "-------------------------------------------------------\n";
-        echo " Pressione \033[1;31mCtrl+C\033[0m para encerrar o servidor.\n\n";
+                if ($job) {
+                    echo " [" . date('Y-m-d H:i:s') . "] Processando Job: " . get_class($job->getJob()) . "\n";
+                    try {
+                        $job->handle();
+                        $job->delete();
+                        echo " [\033[32mOK\033[0m] Job concluído com sucesso.\n";
+                    } catch (\Throwable $e) {
+                        $rawJob = $job->getJob();
+                        $attempts = $job->getAttempts();
+                        $maxTries = $rawJob->tries ?? 1;
 
-        // 3. Comando (Redirecionamos stderr para stdout para ler tudo num handle só)
-        $rootPath = realpath(__DIR__ . '/../../');
-        $publicPath = realpath($rootPath . '/public');
-        $router = realpath($rootPath . '/server.php');
-        
-        if ($router) {
-            // Se temos o router script, usamos ele com -t public
-            $command = sprintf('php -S %s:%d -t %s %s 2>&1', $host, $port, escapeshellarg($publicPath), escapeshellarg($router));
-        } else {
-            // Sem router, apenas -t public
-            $command = sprintf('php -S %s:%d -t %s 2>&1', $host, $port, escapeshellarg($publicPath));
-        }
-
-        // 4. Execução via popen (Mais estável para leitura de fluxo contínuo no Windows)
-        $handle = popen($command, 'r');
-
-        if ($handle) {
-            while (!feof($handle)) {
-                $line = fgets($handle);
-                
-                if ($line === false) {
-                    break;
+                        if ($attempts < $maxTries) {
+                            $backoff = $rawJob->backoff ?? 0;
+                            echo " [\033[33mRE-TENTATIVA\033[0m] Falha (#$attempts). Agendando em $backoff segundos.\n";
+                            $job->release($backoff);
+                        } else {
+                            echo " [\033[31mFALHA TOTAL\033[0m] Máximo de tentativas atingido. Removendo.\n";
+                            $job->delete();
+                        }
+                        
+                        logger()->error("Falha ao processar job " . get_class($rawJob) . ": " . $e->getMessage());
+                    }
+                } else {
+                    if ($once) {
+                        echo " [INFO] Nenhum job pendente. Encerrando worker (--once).\n";
+                        break;
+                    }
+                    // Dorme um pouco se não houver jobs para não estressar a CPU/Banco
+                    sleep(3);
                 }
-
-                // Filtro: Se for a linha de inicialização, ignoramos
-                if (stripos($line, 'Development Server') !== false && stripos($line, 'started') !== false) {
-                    continue;
-                }
-
-                // Exibe o log (Respostas HTTP, Erros, etc)
-                echo $line;
-                
-                // Tenta forçar a saída para o terminal imediatamente
-                if (ob_get_level() > 0) ob_flush();
-                flush();
+            } catch (\Throwable $e) {
+                echo " [\033[31mCRÍTICO\033[0m] Erro no worker: " . $e->getMessage() . "\n";
+                if ($once) break;
+                sleep(3);
             }
-            pclose($handle);
+
+            if ($once && ($job ?? null)) {
+                break;
+            }
         }
+    }
+
+    private function setupApi(array $args): void
+    {
+        echo "Iniciando o Scaffold de API JWT...\n========================================\n";
+
+        $baseDir = realpath(__DIR__ . '/../../');
+        $apiTemplatesDir = __DIR__ . '/Templates/api';
+
+        // 1. Controller
+        $apiControllerDir = $baseDir . '/app/Controllers/Api';
+        if (!is_dir($apiControllerDir)) mkdir($apiControllerDir, 0777, true);
+
+        $controllerPath = $apiControllerDir . '/AuthController.php';
+        if (!file_exists($controllerPath)) {
+            $code = file_get_contents("$apiTemplatesDir/controller.stub");
+            file_put_contents($controllerPath, $code);
+            echo "✅ Controller: Api/AuthController criado.\n";
+        }
+
+        // 2. DTOs
+        $dtoDir = $baseDir . '/app/DTOs/Api';
+        if (!is_dir($dtoDir)) mkdir($dtoDir, 0777, true);
+
+        $loginDtoPath = $dtoDir . '/LoginDTO.php';
+        if (!file_exists($loginDtoPath)) {
+            $code = file_get_contents("$apiTemplatesDir/login_dto.stub");
+            file_put_contents($loginDtoPath, $code);
+            echo "✅ DTO: LoginDTO criado em Api/.\n";
+        }
+
+        $registerDtoPath = $dtoDir . '/RegisterDTO.php';
+        if (!file_exists($registerDtoPath)) {
+            $code = file_get_contents("$apiTemplatesDir/register_dto.stub");
+            file_put_contents($registerDtoPath, $code);
+            echo "✅ DTO: RegisterDTO criado em Api/.\n";
+        }
+
+        // 3. Service
+        $serviceDir = $baseDir . '/app/Services/Api';
+        if (!is_dir($serviceDir)) mkdir($serviceDir, 0777, true);
+
+        $authServicePath = $serviceDir . '/AuthService.php';
+        if (!file_exists($authServicePath)) {
+            $code = file_get_contents("$apiTemplatesDir/auth_service.stub");
+            file_put_contents($authServicePath, $code);
+            echo "✅ Service: Api/AuthService criado.\n";
+        }
+
+        // 4. Model (Specialized User)
+        $modelDir = $baseDir . '/app/Models';
+        $modelPath = $modelDir . '/User.php';
+        if (!file_exists($modelPath)) {
+            $code = file_get_contents("$apiTemplatesDir/user_model.stub");
+            file_put_contents($modelPath, $code);
+            echo "✅ Model: User criado com suporte a JWT.\n";
+        }
+
+        // 5. Migration
+        $migrationDir = $baseDir . '/database/migrations';
+        $existing = glob($migrationDir . '/*_CreateUsersTable.php');
+        if (empty($existing)) {
+            $fileName = date('Y_m_d_His') . '_CreateUsersTable.php';
+            $migrationPath = $migrationDir . '/' . $fileName;
+            $code = file_get_contents("$apiTemplatesDir/migration.stub");
+            file_put_contents($migrationPath, $code);
+            echo "✅ Migration: Tabela de 'users' criada.\n";
+        }
+
+        // 6. Middleware
+        $middlewareDir = $baseDir . '/app/Middleware';
+        if (!is_dir($middlewareDir)) mkdir($middlewareDir, 0777, true);
+        $middlewarePath = $middlewareDir . '/AuthApiMiddleware.php';
+        if (!file_exists($middlewarePath)) {
+            $code = file_get_contents("$apiTemplatesDir/middleware.stub");
+            file_put_contents($middlewarePath, $code);
+            echo "✅ Middleware: AuthApiMiddleware de JWT criado.\n";
+        }
+
+        // 7. Routes (api.php)
+        $apiRoutesPath = $baseDir . '/routes/api.php';
+        if (!file_exists($apiRoutesPath)) {
+            $code = file_get_contents("$apiTemplatesDir/routes.stub");
+            file_put_contents($apiRoutesPath, $code);
+            echo "✅ Rotas: routes/api.php criado.\n";
+
+            // Incluir no web.php
+            $webRoutesPath = $baseDir . '/routes/web.php';
+            if (file_exists($webRoutesPath)) {
+                $webContent = file_get_contents($webRoutesPath);
+                if (strpos($webContent, "'api.php'") === false && strpos($webContent, '"api.php"') === false) {
+                    $snippet = "\n\n// Inclui Rotas de API\nrequire_once __DIR__ . '/api.php';\n";
+                    file_put_contents($webRoutesPath, $webContent . $snippet);
+                    echo "✅ Rotas: routes/api.php incluído no routes/web.php.\n";
+                }
+            }
+        }
+
+        echo "\n🚀 API Scaffold completa! Não esqueça de configurar o JWT_SECRET no seu .env.\n";
+    }
+
+    private function makeJob(array $args): void
+    {
+        if (!isset($args[1])) {
+            echo "Erro: Forneça o nome do Job. Ex: make:job EnviarRelatorio\n";
+            exit(1);
+        }
+
+        $name = $args[1];
+        $dir = realpath(__DIR__ . '/../../') . '/app/Jobs';
+        
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $path = $dir . '/' . $name . '.php';
+        
+        if (file_exists($path)) {
+            echo "Erro: O Job '$name' já existe.\n";
+            exit(1);
+        }
+
+        $content = $this->renderTemplate('job', ['{{className}}' => $name]);
+        $this->createFile($path, $content, "Job '$name'");
     }
 }
