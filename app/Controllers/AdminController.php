@@ -225,7 +225,7 @@ class AdminController
         $this->checkRole(['admin', 'gerente']);
         try {
             $promocoes = $this->promocaoService->getAll();
-            $produtosList = $this->produtoService->getAll();
+            $produtosList = $this->produtoService->getAtivos();
             
             return view('admin/promocoes/index', [
                 'promocoes' => $promocoes,

@@ -6,12 +6,26 @@ $desc = $isEditingError ? old('descricao') : ($categoria->descricao ?? '');
 $descVal = ($desc === 'Não foi colocado' || $desc === null) ? '' : $desc;
 $action = route('admin.categorias.update', ['id' => $idVal]);
 ?>
-<div id="modal-editar-categoria" class="fixed inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden animate-fade-in-up">
+<div id="modal-editar-categoria" 
+     x-data="{ show: false }" 
+     x-init="$nextTick(() => show = true)"
+     x-show="show" 
+     style="display: none;" 
+     class="fixed inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm" 
+     x-transition.opacity.duration.300ms>
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden" 
+         x-show="show"
+         x-transition:enter="transition ease-out duration-300 transform" 
+         x-transition:enter-start="opacity-0 translate-y-8" 
+         x-transition:enter-end="opacity-100 translate-y-0" 
+         x-transition:leave="transition ease-in duration-200 transform" 
+         x-transition:leave-start="opacity-100 translate-y-0" 
+         x-transition:leave-end="opacity-0 translate-y-8"
+         @click.away="show = false; if (!document.getElementById('modal-container').contains($root)) return; setTimeout(() => document.getElementById('modal-container').innerHTML = '', 400)">
 
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
             <h3 class="text-lg font-bold text-gray-900">Editar Categoria</h3>
-            <button onclick="document.getElementById('modal-editar-categoria').remove()" class="text-gray-400 hover:text-gray-700 transition">
+            <button type="button" @click="show = false; if (!document.getElementById('modal-container').contains($root)) return; setTimeout(() => document.getElementById('modal-container').innerHTML = '', 400)" class="text-gray-400 hover:text-gray-700 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -37,7 +51,7 @@ $action = route('admin.categorias.update', ['id' => $idVal]);
             </div>
 
             <div class="flex justify-end gap-3 mt-4">
-                <button type="button" onclick="document.getElementById('modal-editar-categoria').remove()" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                <button type="button" @click="show = false; if (!document.getElementById('modal-container').contains($root)) return; setTimeout(() => document.getElementById('modal-container').innerHTML = '', 400)" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
                     Cancelar
                 </button>
                 <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">

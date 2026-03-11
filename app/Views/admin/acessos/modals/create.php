@@ -1,10 +1,25 @@
 <!-- Modal Novo Acesso (Página Overlay) -->
-<div id="modal-novo-acesso" class="fixed inset-0 z-[60] flex justify-end transition-all duration-300">
+<div id="modal-novo-acesso" 
+     x-data="{ show: false }" 
+     x-init="$nextTick(() => show = true)"
+     x-show="show" 
+     style="display: none;" 
+     class="fixed inset-0 z-[60] flex justify-end">
     <!-- Backdrop -->
-    <div id="modal-backdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0 animate-fade-in" onclick="closeSidePage('modal-novo-acesso')"></div>
+    <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" 
+         x-show="show" 
+         x-transition.opacity.duration.300ms 
+         @click="show = false; setTimeout(() => $root.remove(), 300)"></div>
 
     <!-- Content Card (Página Lateral) -->
-    <div id="modal-content" class="relative w-full max-w-2xl bg-white h-screen shadow-2xl overflow-y-auto animate-slide-in-right flex flex-col">
+    <div class="relative w-full max-w-2xl bg-white h-screen shadow-2xl overflow-y-auto flex flex-col"
+         x-show="show"
+         x-transition:enter="transition ease-out duration-300 transform" 
+         x-transition:enter-start="translate-x-full" 
+         x-transition:enter-end="translate-x-0" 
+         x-transition:leave="transition ease-in duration-300 transform" 
+         x-transition:leave-start="translate-x-0" 
+         x-transition:leave-end="translate-x-full">
 
         <!-- Modal Header -->
         <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
@@ -12,7 +27,7 @@
                 <h3 class="text-xl font-bold text-gray-900 leading-tight">Novo Acesso Staff</h3>
                 <p class="text-gray-500 text-sm">Cadastrar novas credenciais de equipe</p>
             </div>
-            <button onclick="closeSidePage('modal-novo-acesso')" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+            <button type="button" @click="show = false; setTimeout(() => $root.remove(), 300)" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -95,7 +110,7 @@
 
             <!-- Modal Footer -->
             <div class="mt-auto pt-8 border-t border-gray-100 flex justify-end gap-3 sticky bottom-0 bg-white pb-6">
-                <button type="button" onclick="closeSidePage('modal-novo-acesso')" class="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">
+                <button type="button" @click="show = false; setTimeout(() => $root.remove(), 300)" class="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">
                     Cancelar
                 </button>
                 <button type="submit" class="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 leading-none">
@@ -105,63 +120,3 @@
         </form>
     </div>
 </div>
-
-<script>
-    function closeSidePage(id) {
-        const modal = document.getElementById(id);
-        const content = modal.querySelector('#modal-content');
-        const backdrop = modal.querySelector('#modal-backdrop');
-
-        content.classList.remove('animate-slide-in-right');
-        content.classList.add('animate-slide-out-right');
-        backdrop.classList.add('opacity-0');
-
-        setTimeout(() => {
-            modal.remove();
-        }, 300);
-    }
-</script>
-
-<style>
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-        }
-
-        to {
-            transform: translateX(0);
-        }
-    }
-
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-        }
-
-        to {
-            transform: translateX(100%);
-        }
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    .animate-slide-in-right {
-        animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    .animate-slide-out-right {
-        animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    .animate-fade-in {
-        animation: fadeIn 0.3s ease-out forwards;
-    }
-</style>

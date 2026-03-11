@@ -7,6 +7,7 @@ namespace App\DTOs\Admin;
 use Core\Attributes\Image;
 use Core\Attributes\IsInt;
 use Core\Attributes\IsFloat;
+use Core\Attributes\IsBool;
 use Core\Attributes\Min;
 use Core\Attributes\Max;
 use Core\Validation\DataTransferObject;
@@ -48,6 +49,6 @@ class EditProdutoDTO extends DataTransferObject
     public mixed $imagem_url = null;
 
     #[Required(message: 'Campo obrigatório.')]
-    #[IsInt(message: 'Campo inválido.')]
-    public int $ativo;
+    #[IsBool(message: 'Campo inválido.')]
+    public bool $ativo;
 }

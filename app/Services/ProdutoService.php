@@ -25,12 +25,23 @@ class ProdutoService
             $data['imagem_url'] = $dto->imagem_url->store('produtos', 'local');
         }
 
+        if ($dto->ativo == true) {
+            $data['ativo'] = 1;
+        } else {
+            $data['ativo'] = 0;
+        }
+
         return $this->produtoModel->insert($data);
     }
 
     public function getAll(): array
     {
         return $this->produtoModel->all();
+    }
+
+    public function getAtivos(): array
+    {
+        return $this->produtoModel->where('ativo', '=', 1)->get();
     }
 
     public function getById(int|string $id): ?Produto
@@ -48,6 +59,12 @@ class ProdutoService
         } else {
             // Mantém a imagem existente — não sobrescreve com null
             unset($data['imagem_url']);
+        }
+
+        if ($dto->ativo == true) {
+            $data['ativo'] = 1;
+        } else {
+            $data['ativo'] = 0;
         }
 
         return $this->produtoModel->update($id, $data);

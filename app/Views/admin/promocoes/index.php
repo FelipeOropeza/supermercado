@@ -13,7 +13,7 @@
             <p class="text-gray-500 text-sm mt-1.5 font-medium">Configure descontos agendados e produtos em destaque na vitrine principal.</p>
         </div>
         <?php if (in_array($role, ['admin', 'gerente'])): ?>
-            <button onclick="document.getElementById('modal-nova-promocao').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md shadow-blue-100 transition-all duration-200 flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95">
+            <button x-data @click="$dispatch('open-modal-promocao')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md shadow-blue-100 transition-all duration-200 flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95">
                 <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                 Agendar Nova Oferta
             </button>
@@ -30,16 +30,16 @@
     </div>
 
     <!-- Main List (Table Design) -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative z-10">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead class="bg-gray-50/80 border-b border-gray-100 text-gray-500 font-bold uppercase tracking-wider">
+            <table class="w-full text-left whitespace-nowrap">
+                <thead class="bg-white border-b border-gray-100 text-gray-400 text-[11px] font-black uppercase tracking-widest">
                     <tr>
-                        <th class="py-5 px-6 w-12 text-center text-[10px]">Posição</th>
-                        <th class="py-5 px-6">Produto & Status</th>
-                        <th class="py-5 px-6">Período de Validade</th>
-                        <th class="py-5 px-6 text-right">Preços (Base → Promo)</th>
-                        <th class="py-5 px-6 w-32 text-right">Operações</th>
+                        <th class="py-6 px-6 w-16 text-center">Home</th>
+                        <th class="py-6 px-6">Produto em Oferta</th>
+                        <th class="py-6 px-6">Status da Campanha</th>
+                        <th class="py-6 px-6 text-right">Comparativo (R$)</th>
+                        <th class="py-6 px-8 w-24 text-right">Ação</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 text-gray-700">
@@ -51,61 +51,100 @@
                         
                         $status = 'Encerrada';
                         $statusColor = 'bg-gray-300';
-                        $statusShadow = 'shadow-gray-100';
+                        $statusTextColor = 'text-gray-500';
                         $statusPulse = '';
 
-                        // Compara os objetos diretamente (usa timestamps internos)
                         if ($agora < $inicio) {
                             $status = 'Agendada';
-                            $statusColor = 'bg-amber-500';
-                            $statusShadow = 'shadow-amber-200';
+                            $statusColor = 'bg-amber-400';
+                            $statusTextColor = 'text-amber-500';
                         } elseif ($agora <= $fim) {
                             $status = 'No Ar';
                             $statusColor = 'bg-green-500';
-                            $statusShadow = 'shadow-green-200';
+                            $statusTextColor = 'text-green-600';
                             $statusPulse = 'animate-pulse';
                         }
+
+                        $prodAtivo = $promocao->produto->ativo ?? false;
                     ?>
-                    <tr class="hover:bg-blue-50/20 transition-colors group">
-                        <td class="py-6 px-6 text-center">
+                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                        
+                        <!-- Coluna 1: Home/Destaque -->
+                        <td class="py-5 px-6 text-center">
                             <?php if ($promocao->destaque_folheto): ?>
-                            <div class="inline-flex items-center justify-center p-2 rounded-lg bg-amber-50 text-amber-500 ring-1 ring-amber-100 shadow-sm" title="Item em Destaque (Capa do Folheto)">
+                            <div class="inline-flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 text-amber-500 ring-1 ring-amber-200/50 shadow-sm transition-transform group-hover:scale-110" title="Item em Destaque (Capa do Folheto)">
                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                             </div>
                             <?php else: ?>
-                            <div class="inline-flex items-center justify-center p-2 text-gray-200" title="Sem Destaque">
+                            <div class="inline-flex items-center justify-center p-2.5 text-gray-200 transition-colors group-hover:text-gray-300" title="Sem Destaque">
                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                             </div>
                             <?php endif; ?>
                         </td>
-                        <td class="py-6 px-6">
-                            <div class="flex items-center gap-3">
-                                <div class="w-2 h-2 rounded-full <?= $statusColor ?> shadow-lg <?= $statusShadow ?> <?= $statusPulse ?>"></div>
-                                <div>
-                                    <div class="text-base font-bold text-gray-900"><?= $promocao->produto->nome ?></div>
-                                    <div class="text-[10px] font-bold text-blue-600 uppercase tracking-tighter"><?= $status ?></div>
+
+                        <!-- Coluna 2: Produto -->
+                        <td class="py-5 px-6">
+                            <div class="flex flex-col gap-1.5">
+                                <div class="text-base font-extrabold text-gray-900 truncate max-w-xs transition-colors group-hover:text-blue-700">
+                                    <?= htmlspecialchars($promocao->produto->nome) ?>
+                                </div>
+                                <div class="flex items-center">
+                                    <?php if ($prodAtivo): ?>
+                                        <span class="inline-flex items-center gap-1 text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 uppercase tracking-widest">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Produto Ativo
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="inline-flex items-center gap-1 text-[9px] font-black text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 uppercase tracking-widest" title="O produto está inativo. Oferta não será vista pelo cliente.">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Produto Oculto
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-6 px-6 font-medium text-gray-600 italic">
-                            <?= $inicio->format('d/m/Y H:i') ?> <span class="mx-1 text-gray-300">até</span> <?= $fim->format('d/m/Y H:i') ?>
-                        </td>
-                        <td class="py-6 px-6 text-right">
-                            <div class="flex flex-col">
-                                <span class="text-xs font-bold text-gray-400 line-through opacity-70">R$ <?= number_format($promocao->produto->preco, 2, ',', '.') ?></span>
-                                <span class="text-xl font-black text-green-600 tracking-tight leading-none">R$ <?= number_format($promocao->preco_promocional, 2, ',', '.') ?></span>
+
+                        <!-- Coluna 3: Status da Campanha -->
+                        <td class="py-5 px-6">
+                            <div class="flex flex-col gap-2">
+                                <div class="inline-flex items-center gap-2">
+                                    <div class="relative flex h-2.5 w-2.5">
+                                        <?php if ($statusPulse): ?>
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full <?= $statusColor ?> opacity-75"></span>
+                                        <?php endif; ?>
+                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 <?= $statusColor ?>"></span>
+                                    </div>
+                                    <span class="text-[11px] font-black <?= $statusTextColor ?> uppercase tracking-widest"><?= $status ?></span>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100"><?= $inicio->format('d/m/Y H:i') ?></span>
+                                    <span class="text-gray-300 font-normal">→</span> 
+                                    <span class="bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100"><?= $fim->format('d/m/Y H:i') ?></span>
+                                </div>
                             </div>
                         </td>
-                        <td class="py-6 px-6 text-right">
+
+                        <!-- Coluna 4: Comparativo R$ -->
+                        <td class="py-5 px-6 text-right">
+                            <div class="flex flex-col justify-center items-end gap-0.5">
+                                <span class="text-xs font-bold text-red-400 line-through opacity-80 decoration-2">R$ <?= number_format($promocao->produto->preco, 2, ',', '.') ?></span>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                                    <span class="text-2xl font-black text-green-600 tracking-tight leading-none drop-shadow-sm">R$ <?= number_format($promocao->preco_promocional, 2, ',', '.') ?></span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Coluna 5: Ações -->
+                        <td class="py-5 px-8 text-right">
                             <?php if ($role === 'admin'): ?>
-                                <form action="<?= route('admin.promocoes.destroy', ['id' => $promocao->id]) ?>" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta promoção?')">
+                                <form action="<?= route('admin.promocoes.destroy', ['id' => $promocao->id]) ?>" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja remover esta promoção?')">
                                     <?= csrf_field() ?>
-                                    <button type="submit" class="text-gray-400 hover:text-red-500 transition-all p-2 rounded-xl hover:bg-red-50" title="Remover Promoção">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <button type="submit" class="text-gray-400 bg-white border border-gray-200 shadow-sm hover:text-red-500 hover:border-red-200 transition-all p-2.5 rounded-xl hover:bg-red-50 active:scale-95 group/btn" title="Remover Promoção">
+                                        <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <span class="text-[10px] font-bold text-gray-300 uppercase italic">Somente Leitura</span>
+                                <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Apenas Leitura</span>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -114,13 +153,13 @@
                     <!-- EMPTY STATE PLACEHOLDER -->
                     <?php if (empty($promocoes)): ?>
                     <tr>
-                        <td colspan="5" class="py-20 px-6 text-center">
-                            <div class="max-w-xs mx-auto">
-                                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
-                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <td colspan="5" class="py-32 px-6 text-center">
+                            <div class="max-w-md mx-auto flex flex-col items-center">
+                                <div class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-200/50 shadow-inner">
+                                    <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-900">Sem ofertas ativas</h3>
-                                <p class="text-gray-500 text-sm mt-1">Crie sua primeira promoção agendada clicando no botão acima.</p>
+                                <h3 class="text-xl font-black text-gray-900 tracking-tight">O folheto está vazio</h3>
+                                <p class="text-gray-500 text-sm mt-2 font-medium">Você ainda não programou nenhuma oferta especial para a loja. Que tal criar uma agora?</p>
                             </div>
                         </td>
                     </tr>
@@ -134,13 +173,4 @@
     <?= $this->include('admin/promocoes/modals/create') ?>
 </div>
 
-<style>
-    @keyframes modalEntrance {
-        from { opacity: 0; transform: scale(0.95) translateY(20px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .animate-modal-entrance { 
-        animation: modalEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-    }
-</style>
 
