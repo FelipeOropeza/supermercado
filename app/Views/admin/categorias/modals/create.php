@@ -10,7 +10,7 @@
                 </svg>
             </button>
         </div>
-
+        <span class="text-red-500 text-[10px] mt-1.5 font-bold italic ml-1"><?= errors('error') ?></span>
         <form action="<?= route('admin.categorias.store') ?>" method="POST" class="p-6">
             <?= csrf_field() ?>
             <div class="mb-4">

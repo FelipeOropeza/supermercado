@@ -2,10 +2,10 @@
 <div id="modal-novo-acesso" class="fixed inset-0 z-[60] flex justify-end transition-all duration-300">
     <!-- Backdrop -->
     <div id="modal-backdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0 animate-fade-in" onclick="closeSidePage('modal-novo-acesso')"></div>
-    
+
     <!-- Content Card (Página Lateral) -->
     <div id="modal-content" class="relative w-full max-w-2xl bg-white h-screen shadow-2xl overflow-y-auto animate-slide-in-right flex flex-col">
-        
+
         <!-- Modal Header -->
         <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
             <div>
@@ -19,6 +19,7 @@
             </button>
         </div>
 
+        <span class="text-red-500 text-[10px] mt-1.5 font-bold italic ml-1"><?= errors('error') ?></span>
         <!-- Modal Body -->
         <form action="<?= route('admin.acessos.store') ?>" method="POST" class="p-8 flex-grow flex flex-col">
             <?= csrf_field() ?>
@@ -71,7 +72,9 @@
                                 <option value="admin" <?= old('role') === 'admin' ? 'selected' : '' ?>>Administrador</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
                             </div>
                         </div>
                         <?php if (errors('role')): ?>
@@ -108,11 +111,11 @@
         const modal = document.getElementById(id);
         const content = modal.querySelector('#modal-content');
         const backdrop = modal.querySelector('#modal-backdrop');
-        
+
         content.classList.remove('animate-slide-in-right');
         content.classList.add('animate-slide-out-right');
         backdrop.classList.add('opacity-0');
-        
+
         setTimeout(() => {
             modal.remove();
         }, 300);
@@ -121,23 +124,43 @@
 
 <style>
     @keyframes slideInRight {
-        from { transform: translateX(100%); }
-        to { transform: translateX(0); }
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
     }
+
     @keyframes slideOutRight {
-        from { transform: translateX(0); }
-        to { transform: translateX(100%); }
+        from {
+            transform: translateX(0);
+        }
+
+        to {
+            transform: translateX(100%);
+        }
     }
+
     @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
+
     .animate-slide-in-right {
         animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
+
     .animate-slide-out-right {
         animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
+
     .animate-fade-in {
         animation: fadeIn 0.3s ease-out forwards;
     }

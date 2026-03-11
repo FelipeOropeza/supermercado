@@ -57,19 +57,37 @@ class AdminController
 
     public function categorias(): mixed
     {
-        $categorias = $this->categoriaService->getAll();
-        return view('admin/categorias/index', ['categorias' => $categorias]);
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        try {
+            $categorias = $this->categoriaService->getAll();
+            return view('admin/categorias/index', ['categorias' => $categorias]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível listar as categorias');
+            return Response::makeRedirect('/admin/categorias');
+        }
     }
 
     public function categoriasCreate(): mixed
     {
-        return view('admin/categorias/modals/create');
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        try {
+            return view('admin/categorias/modals/create');
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível criar a categoria');
+            return Response::makeRedirect('/admin/categorias');
+        }
     }
 
     public function categoriasEdit(int|string $id): mixed
     {
-        $categoria = $this->categoriaService->getById($id);
-        return view('admin/categorias/modals/edit', ['categoria' => $categoria]);
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        try {
+            $categoria = $this->categoriaService->getById($id);
+            return view('admin/categorias/modals/edit', ['categoria' => $categoria]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível editar a categoria');
+            return Response::makeRedirect('/admin/categorias');
+        }
     }
 
     public function categoriasStore(CategoriaDTO $dto): Response
@@ -78,7 +96,7 @@ class AdminController
         try {
             $this->categoriaService->create($dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao criar categoria: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível criar a categoria');
             return Response::makeRedirect('/admin/categorias');
         }
 
@@ -92,7 +110,7 @@ class AdminController
         try {
             $this->categoriaService->delete($id);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao excluir categoria: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível excluir a categoria');
             return Response::makeRedirect('/admin/categorias');
         }
 
@@ -106,7 +124,7 @@ class AdminController
         try {
             $this->categoriaService->update($id, $dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao atualizar categoria: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível atualizar a categoria');
             return Response::makeRedirect('/admin/categorias');
         }
 
@@ -116,19 +134,31 @@ class AdminController
 
     public function produtos(): mixed
     {
-        $produtos = $this->produtoService->getAll();
-        $categoriasList = $this->categoriaService->getAll();
-
-        return view('admin/produtos/index', [
-            'produtos'       => $produtos,
-            'categoriasList' => $categoriasList,
-        ]);
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        try {
+            $produtos = $this->produtoService->getAll();
+            $categoriasList = $this->categoriaService->getAll();
+            
+            return view('admin/produtos/index', [
+                'produtos'       => $produtos,
+                'categoriasList' => $categoriasList,
+            ]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível listar os produtos');
+            return Response::makeRedirect('/admin/produtos');
+        }
     }
 
     public function produtosCreate(): mixed
     {
-        $categoriasList = $this->categoriaService->getAll();
-        return view('admin/produtos/modals/create', ['categoriasList' => $categoriasList]);
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        try {
+            $categoriasList = $this->categoriaService->getAll();
+            return view('admin/produtos/modals/create', ['categoriasList' => $categoriasList]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível criar o produto');
+            return Response::makeRedirect('/admin/produtos');
+        }
     }
 
     public function produtosStore(ProdutoDTO $dto): Response
@@ -137,7 +167,7 @@ class AdminController
         try {
             $this->produtoService->create($dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao criar produto: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível criar o produto');
             return Response::makeRedirect('/admin/produtos');
         }
 
@@ -147,8 +177,14 @@ class AdminController
 
     public function produtosEdit(int|string $id): mixed
     {
-        $produto        = $this->produtoService->getById($id);
-        $categoriasList = $this->categoriaService->getAll();
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        try {
+            $produto        = $this->produtoService->getById($id);
+            $categoriasList = $this->categoriaService->getAll();
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível editar o produto');
+            return Response::makeRedirect('/admin/produtos');
+        }
 
         return view('admin/produtos/modals/edit', [
             'produto'        => $produto,
@@ -162,7 +198,7 @@ class AdminController
         try {
             $this->produtoService->update($id, $dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao atualizar produto: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível atualizar o produto');
             return Response::makeRedirect('/admin/produtos');
         }
 
@@ -176,7 +212,7 @@ class AdminController
         try {
             $this->produtoService->delete($id);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao excluir produto: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível excluir o produto');
             return Response::makeRedirect('/admin/produtos');
         }
 
@@ -186,13 +222,19 @@ class AdminController
 
     public function promocoes(): mixed
     {
-        $promocoes = $this->promocaoService->getAll();
-        $produtosList = $this->produtoService->getAll();
-        
-        return view('admin/promocoes/index', [
-            'promocoes' => $promocoes,
-            'produtosList' => $produtosList
-        ]);
+        $this->checkRole(['admin', 'gerente']);
+        try {
+            $promocoes = $this->promocaoService->getAll();
+            $produtosList = $this->produtoService->getAll();
+            
+            return view('admin/promocoes/index', [
+                'promocoes' => $promocoes,
+                'produtosList' => $produtosList
+            ]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível listar as promoções');
+            return Response::makeRedirect('/admin/promocoes');
+        }
     }
 
     public function promocoesStore(PromocaoDTO $dto): Response
@@ -201,7 +243,7 @@ class AdminController
         try {
             $this->promocaoService->create($dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao criar promoção: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível criar a promoção');
             return Response::makeRedirect('/admin/promocoes');
         }
 
@@ -215,7 +257,7 @@ class AdminController
         try {
             $this->promocaoService->delete($id);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao excluir promoção: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível excluir a promoção');
             return Response::makeRedirect('/admin/promocoes');
         }
 
@@ -226,14 +268,24 @@ class AdminController
     public function acessos(): mixed
     {
         $this->checkRole(['admin']);
-        $acessos = $this->acessoService->getAll();
-        return view('admin/acessos/index', ['acessos' => $acessos]);
+        try {
+            $acessos = $this->acessoService->getAll();
+            return view('admin/acessos/index', ['acessos' => $acessos]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível listar os acessos');
+            return Response::makeRedirect('/admin/acessos');
+        }
     }
 
     public function acessosCreate(): mixed
     {
         $this->checkRole(['admin']);
-        return view('admin/acessos/modals/create');
+        try {
+            return view('admin/acessos/modals/create');
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível criar o acesso');
+            return Response::makeRedirect('/admin/acessos');
+        }
     }
 
     public function acessosStore(AcessoDTO $dto): Response
@@ -242,7 +294,7 @@ class AdminController
         try {
             $this->acessoService->create($dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao criar acesso: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível criar o acesso');
             return Response::makeRedirect('/admin/acessos');
         }
 
@@ -253,7 +305,12 @@ class AdminController
     public function acessosEdit(int|string $id): mixed
     {
         $this->checkRole(['admin']);
-        $acesso = $this->acessoService->getById($id);
+        try {
+            $acesso = $this->acessoService->getById($id);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível editar o acesso');
+            return Response::makeRedirect('/admin/acessos');
+        }
         return view('admin/acessos/modals/edit', ['acesso' => $acesso]);
     }
 
@@ -263,7 +320,7 @@ class AdminController
         try {
             $this->acessoService->update($id, $dto);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao atualizar acesso: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível atualizar o acesso');
             return Response::makeRedirect('/admin/acessos');
         }
 
@@ -277,14 +334,14 @@ class AdminController
         
         // Bloqueia exclusão do usuário root (ID 1)
         if ($id == 1) {
-            session()->set('error', 'O sistema não permite excluir o usuário raiz.');
+            fail_validation('error', 'O sistema não permite excluir o usuário raiz.');
             return Response::makeRedirect('/admin/acessos');
         }
 
         try {
             $this->acessoService->delete($id);
         } catch (\Exception $e) {
-            session()->set('error', 'Erro ao excluir acesso: ' . $e->getMessage());
+            fail_validation('error', 'Não foi possível excluir o acesso');
             return Response::makeRedirect('/admin/acessos');
         }
 

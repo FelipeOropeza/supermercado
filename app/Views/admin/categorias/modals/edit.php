@@ -17,7 +17,7 @@ $action = route('admin.categorias.update', ['id' => $idVal]);
                 </svg>
             </button>
         </div>
-
+        <span class="text-red-500 text-[10px] mt-1.5 font-bold italic ml-1"><?= errors('error') ?></span>
         <form id="form-editar-categoria" action="<?= $action ?>" method="POST" class="p-6">
             <?= csrf_field() ?>
             <input type="hidden" name="id" id="edit-id" value="<?= htmlspecialchars((string)$idVal) ?>">

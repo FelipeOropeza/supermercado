@@ -14,6 +14,7 @@ $categoriasList = (new \App\Services\CategoriaService())->getAll();
             </button>
         </div>
 
+        <span class="text-red-500 text-[10px] mt-1.5 font-bold italic ml-1"><?= errors('error') ?></span>
         <form action="<?= route('admin.produtos.update', ['id' => $produto->id]) ?>" method="POST" enctype="multipart/form-data" class="p-6">
             <?= csrf_field() ?>
             <input type="hidden" name="id" value="<?= $produto->id ?>">

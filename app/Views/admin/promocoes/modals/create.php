@@ -21,6 +21,7 @@ $produtosList = $produtosList ?? (new \App\Services\ProdutoService())->getAll();
             </button>
         </div>
         
+        <span class="text-red-500 text-[10px] mt-1.5 font-bold italic ml-1"><?= errors('error') ?></span>
         <form action="<?= route('admin.promocoes.store') ?>" method="POST" class="p-8">
             <?= csrf_field() ?>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
