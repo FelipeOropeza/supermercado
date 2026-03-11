@@ -35,4 +35,9 @@ class PromocaoService
     {
         return $this->promocaoModel->delete($id);
     }
+
+    public function count(): int
+    {
+        return $this->promocaoModel->count();
+    }
 }

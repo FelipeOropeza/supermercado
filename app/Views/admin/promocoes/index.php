@@ -1,4 +1,8 @@
 <?php $this->layout('layouts/admin', ['title' => 'Gestão de Promoções - Admin']); ?>
+<?php 
+    $role = session('user')['role'] ?? 'cliente';
+    if ($role === 'funcionario') { header('Location: /admin'); exit; }
+?>
 
 <div class="max-w-7xl mx-auto w-full">
 
@@ -8,10 +12,12 @@
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Folheto de Promoções</h2>
             <p class="text-gray-500 text-sm mt-1.5 font-medium">Configure descontos agendados e produtos em destaque na vitrine principal.</p>
         </div>
-        <button onclick="document.getElementById('modal-nova-promocao').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md shadow-blue-100 transition-all duration-200 flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95">
-            <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-            Agendar Nova Oferta
-        </button>
+        <?php if (in_array($role, ['admin', 'gerente'])): ?>
+            <button onclick="document.getElementById('modal-nova-promocao').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md shadow-blue-100 transition-all duration-200 flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95">
+                <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                Agendar Nova Oferta
+            </button>
+        <?php endif; ?>
     </div>
 
     <!-- Status Legend & Filters (Optional but nice for UX) -->
@@ -91,12 +97,16 @@
                             </div>
                         </td>
                         <td class="py-6 px-6 text-right">
-                            <form action="<?= route('admin.promocoes.destroy', ['id' => $promocao->id]) ?>" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta promoção?')">
-                                <?= csrf_field() ?>
-                                <button type="submit" class="text-gray-400 hover:text-red-500 transition-all p-2 rounded-xl hover:bg-red-50" title="Remover Promoção">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </form>
+                            <?php if ($role === 'admin'): ?>
+                                <form action="<?= route('admin.promocoes.destroy', ['id' => $promocao->id]) ?>" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta promoção?')">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="text-gray-400 hover:text-red-500 transition-all p-2 rounded-xl hover:bg-red-50" title="Remover Promoção">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <span class="text-[10px] font-bold text-gray-300 uppercase italic">Somente Leitura</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

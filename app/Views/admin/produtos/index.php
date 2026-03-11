@@ -1,4 +1,5 @@
 <?php $this->layout('layouts/admin', ['title' => 'Gestão de Produtos - Admin']); ?>
+<?php $role = session('user')['role'] ?? 'cliente'; ?>
 
 <div class="max-w-7xl mx-auto w-full">
 
@@ -23,7 +24,9 @@
                         <th class="py-4 px-6 font-semibold">Categoria</th>
                         <th class="py-4 px-6 font-semibold text-right">Estoque</th>
                         <th class="py-4 px-6 font-semibold text-right">Preço</th>
-                        <th class="py-4 px-6 font-semibold w-32 text-right">Ação</th>
+                        <?php if ($role !== 'funcionario'): ?>
+                            <th class="py-4 px-6 font-semibold w-32 text-right">Ação</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
@@ -64,15 +67,30 @@
                                 <td class="py-4 px-6 text-right font-medium text-gray-900">
                                     R$ <?= number_format($produto->preco, 2, ',', '.') ?>
                                 </td>
-                                <td class="py-4 px-6 text-right">
-                                    <div class="flex justify-end gap-2 items-center">
-                                        <button hx-get="<?= route('admin.produtos.edit', ['id' => $produto->id]) ?>" hx-target="#modal-container" class="text-blue-600 hover:text-blue-800 font-medium p-1">Editar</button>
-                                        <form action="<?= route('admin.produtos.destroy', ['id' => $produto->id]) ?>" method="POST" onsubmit="return confirm('Deseja realmente remover?')">
-                                            <?= csrf_field() ?>
-                                            <button type="submit" class="text-red-500 hover:text-red-700 font-medium p-1">Remover</button>
-                                        </form>
-                                    </div>
-                                </td>
+                                <?php if ($role !== 'funcionario'): ?>
+                                    <td class="py-4 px-6 text-right">
+                                        <div class="flex justify-end gap-2 items-center">
+                                            <?php if (in_array($role, ['admin', 'gerente'])): ?>
+                                                <button hx-get="<?= route('admin.produtos.edit', ['id' => $produto->id]) ?>" hx-target="#modal-container" hx-swap="innerHTML" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all" title="Editar Produto">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                                    </svg>
+                                                </button>
+                                            <?php endif; ?>
+
+                                            <?php if ($role === 'admin'): ?>
+                                                <form action="<?= route('admin.produtos.destroy', ['id' => $produto->id]) ?>" method="POST" onsubmit="return confirm('Deseja realmente remover este produto?')">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit" class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all" title="Excluir Produto">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

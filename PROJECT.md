@@ -26,16 +26,16 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 
 ## 🛠️ Fase 3: Painel Administrativo (Gestão do Supermercado)
 **Foco:** CRUDs (Telas restritas aos gerentes e funcionários) para retroalimentar o sistema.
-- [ ] **Gestão de Categorias:** Listagem, inserção e exclusão (soft delete) das categorias de prateleira (Frios, Açougue, Mercearia).
-- [ ] **Gestão de Produtos:** Upload de Imagens no servidor, definição de preços e estoque, e vinculação com uma Categoria já cadastrada.
+- [x] **Gestão de Categorias:** Listagem, inserção e exclusão (soft delete) das categorias de prateleira (Frios, Açougue, Mercearia).
+- [x] **Gestão de Produtos:** Upload de Imagens no servidor, definição de preços e estoque, e vinculação com uma Categoria já cadastrada.
 - [x] **Promoções (O "Folheto"):** Tela para escolher produtos existentes e aplicar a eles um `preco_promocional` agendando a `data_inicio` e a `data_fim`, além de definir a flag de `destaque_folheto`.
-- [ ] **Acessos:** Tela para o Admin incluir, editar e bloquear acessos de `funcionarios` que gerenciarão a loja.
+- [x] **Acessos:** Tela para o Admin incluir, editar e bloquear acessos de `funcionarios` que gerenciarão a loja.
 
 ---
 
 ## 🛍️ Fase 4: Frente de Loja (Vitrine Pública)
 **Foco:** Navegação do usuário interessado nos produtos. Interface rápida e atraente.
-- [x] **Home Page (Folheto):** `HomeController` renderizando a view inicial. A interface deve consultar no BD todas as `promocoes` cuja `data_inicio` <= hoje e `data_fim` >= hoje com *destaque folheto = 1*.
+- [ ] **Home Page (Folheto):** `HomeController` renderizando a view inicial. A interface deve consultar no BD todas as `promocoes` cuja `data_inicio` <= hoje e `data_fim` >= hoje com *destaque folheto = 1*.
 - [ ] **Listagem por Categoria:** Criar um menu ou filtro para o cliente listar "Apenas Frios", "Apenas Hortifruti", etc., exibindo os produtos do respectivo `categoria_id`.
 - [ ] **Busca:** Campo de busca textual por nome do produto usando simples *like* no backend e SQL paramétrico (segurança contra SQL Injection).
 

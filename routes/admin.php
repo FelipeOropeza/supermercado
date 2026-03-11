@@ -23,4 +23,9 @@ Route::group(['prefix' => '/admin', 'middleware' => 'admin'], function () {
     Route::post('/promocoes', [AdminController::class, 'promocoesStore'])->name('admin.promocoes.store');
     Route::post('/promocoes/{id}/destroy', [AdminController::class, 'promocoesDestroy'])->name('admin.promocoes.destroy');
     Route::get('/acessos', [AdminController::class, 'acessos'])->name('admin.acessos.index');
+    Route::get('/acessos/create', [AdminController::class, 'acessosCreate'])->name('admin.acessos.create');
+    Route::post('/acessos', [AdminController::class, 'acessosStore'])->name('admin.acessos.store');
+    Route::get('/acessos/{id}/edit', [AdminController::class, 'acessosEdit'])->name('admin.acessos.edit');
+    Route::post('/acessos/{id}/update', [AdminController::class, 'acessosUpdate'])->name('admin.acessos.update');
+    Route::post('/acessos/{id}/destroy', [AdminController::class, 'acessosDestroy'])->name('admin.acessos.destroy');
 });

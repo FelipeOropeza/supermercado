@@ -88,12 +88,16 @@ class Handler
                     'errors' => $exception->errors
                 ], 422);
             } else {
+                // Descobre de onde o usuário veio (página do formulário) para permitir exibir os erros lá
+                $referer = request()->referer();
+                $originPath = parse_url($referer, PHP_URL_PATH) ?: request()->path();
+
                 session()->flash('errors', $exception->errors);
-                session()->flash('errors_origin', request()->path());
+                session()->flash('errors_origin', $originPath);
 
                 $cleanOld = array_filter($exception->oldInput, fn($v) => !($v instanceof \Core\Http\UploadedFile));
                 session()->flash('old', $cleanOld);
-                session()->flash('old_origin', request()->path());
+                session()->flash('old_origin', $originPath);
 
                 $referer = $_SERVER['HTTP_REFERER'] ?? '/';
                 return \Core\Http\Response::makeRedirect($referer);

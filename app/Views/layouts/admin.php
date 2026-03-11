@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Supermercado | Admin Panel') ?></title>
+    <title><?= e($title ?? 'Supermercado | Admin Panel') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -42,6 +42,8 @@
         </div>
 
         <nav class="flex flex-col flex-grow p-4 space-y-1">
+            <?php $role = session('user')['role'] ?? 'cliente'; ?>
+
             <a href="/admin" class="px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors <?= ($_SERVER['REQUEST_URI'] ?? '') === '/admin' ? 'bg-blue-50 text-blue-700' : 'text-gray-600' ?>">
                 Dashboard
             </a>
@@ -51,18 +53,33 @@
             <a href="/admin/produtos" class="px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/produtos') !== false ? 'bg-blue-50 text-blue-700' : 'text-gray-600' ?>">
                 Produtos
             </a>
-            <a href="/admin/promocoes" class="px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/promocoes') !== false ? 'bg-blue-50 text-blue-700' : 'text-gray-600' ?>">
-                Promoções
-            </a>
-            <a href="/admin/acessos" class="px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/acessos') !== false ? 'bg-blue-50 text-blue-700' : 'text-gray-600' ?>">
-                Acessos
-            </a>
+
+            <?php if (in_array($role, ['admin', 'gerente'])): ?>
+                <a href="/admin/promocoes" class="px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/promocoes') !== false ? 'bg-blue-50 text-blue-700' : 'text-gray-600' ?>">
+                    Promoções
+                </a>
+            <?php endif; ?>
+
+            <?php if ($role === 'admin'): ?>
+                <a href="/admin/acessos" class="px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/acessos') !== false ? 'bg-blue-50 text-blue-700' : 'text-gray-600' ?>">
+                    Acessos
+                </a>
+            <?php endif; ?>
         </nav>
 
         <div class="mt-auto border-t border-gray-100 p-4 shrink-0">
             <div class="flex items-center gap-3 px-4 py-3 mb-2">
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">A</div>
-                <div class="text-sm font-medium text-gray-700">Administrador</div>
+                <?php
+                $roleLabel = [
+                    'admin' => 'Administrador',
+                    'gerente' => 'Gerente',
+                    'funcionario' => 'Funcionário'
+                ][$role] ?? 'Staff';
+                ?>
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
+                    <?= strtoupper(session('user')['nome'][0] ?? 'S') ?>
+                </div>
+                <div class="text-sm font-medium text-gray-700"><?= $roleLabel ?></div>
             </div>
             <form action="/logout" method="POST">
                 <button type="submit" class="w-full bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg py-2.5 px-4 hover:bg-gray-50 transition-colors shadow-sm">

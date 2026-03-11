@@ -12,8 +12,9 @@ class AdminMiddleware implements MiddlewareInterface
     public function handle(Request $request, Closure $next):Response
     {
         $user = session('user');
+        $allowedRoles = ['admin', 'gerente', 'funcionario'];
 
-        if (!$user || ($user['role'] ?? '') !== 'admin') {
+        if (!$user || !in_array($user['role'] ?? '', $allowedRoles)) {
             if ($request->isApi()) {
                 return Response::makeJson(['error' => 'Acesso restrito apenas para administradores.'], 403);
             }
@@ -28,4 +29,3 @@ class AdminMiddleware implements MiddlewareInterface
         return $next($request);
     }
 }
-
