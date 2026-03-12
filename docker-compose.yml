@@ -10,12 +10,34 @@ services:
     ports:
       # A porta da esquerda (Seu PC) aponta para a porta da direita (Dentro do docker virtual)
       - "8000:8000"
-    environment:
-      # Se você criar um arquivo .env depois, o Docker pode puxá-lo aqui também
-      - APP_ENV=local
     volumes:
       - .:/app
+      - ./Caddyfile:/etc/frankenphp/Caddyfile
+    environment:
+      - APP_ENV=local
+      - MERCURE_PUBLISHER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
+      - MERCURE_SUBSCRIBER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
+      - MERCURE_URL=http://localhost:8000/.well-known/mercure
+      - MERCURE_PUBLIC_URL=http://localhost:8000/.well-known/mercure
     depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Worker Background (Monitor de Promoções 24/7)
+  watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mvc_watcher
+    command: php /app/forge promocoes:watch
+    volumes:
+      - .:/app
+    environment:
+      - APP_ENV=local
+      - MERCURE_PUBLISHER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
+      - MERCURE_URL=http://app:8000/.well-known/mercure
+    depends_on:
+      - app
       - redis
     restart: unless-stopped
 

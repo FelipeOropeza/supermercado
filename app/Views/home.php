@@ -28,89 +28,25 @@
     </div>
 </div>
 
-<!-- Seção: Produtos (Mockup Inicial) -->
+<!-- Seção: Produtos (Dinâmica via Promoções) -->
 <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
     <h2 id="folheto" class="text-2xl font-bold flex items-center gap-2 text-gray-800 mb-8 border-b pb-4">
         🔥 Ofertas em Destaque
     </h2>
 
-    <!-- Grid de Produtos Mockados -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-        <!-- Card 1 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
-            <div class="h-48 bg-gray-200 flex items-center justify-center text-5xl">🍎</div>
-            <div class="p-5">
-                <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">Hortifruti</div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Maçã Fuji Nacional</h3>
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="text-gray-400 line-through text-sm">R$ 9,99/kg</span>
-                    <span class="text-2xl font-extrabold text-red-600">R$ 7,50</span>
-                </div>
-                <?php if (!session()->has('user')): ?>
-                    <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
-                        Faça login para comprar
-                    </a>
-                <?php else: ?>
-                    <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                        <span>Adicionar</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </button>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
-            <div class="h-48 bg-gray-200 flex items-center justify-center text-5xl">🥩</div>
-            <div class="p-5">
-                <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">Açougue</div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Picanha Bovina Fatiada</h3>
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="text-gray-400 line-through text-sm">R$ 89,90/kg</span>
-                    <span class="text-2xl font-extrabold text-red-600">R$ 65,99</span>
-                </div>
-                <?php if (!session()->has('user')): ?>
-                    <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
-                        Faça login para comprar
-                    </a>
-                <?php else: ?>
-                    <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                        <span>Adicionar</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </button>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
-            <div class="h-48 bg-gray-200 flex items-center justify-center text-5xl">🍞</div>
-            <div class="p-5">
-                <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">Padaria</div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Pão Francês Quentinho</h3>
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="text-2xl font-extrabold text-gray-900">R$ 15,90<span class="text-base font-normal text-gray-500">/kg</span></span>
-                </div>
-                <?php if (!session()->has('user')): ?>
-                    <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
-                        Faça login para comprar
-                    </a>
-                <?php else: ?>
-                    <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                        <span>Adicionar</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </button>
-                <?php endif; ?>
-            </div>
-        </div>
-
-    </div>
+    <!-- Grid de Produtos Reativo -->
+    <?php include __DIR__ . '/components/promocoes_grid.php'; ?>
 </main>
+<?php $this->endSection(); ?>
+
+<?php $this->section('scripts'); ?>
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+</style>
 <?php $this->endSection(); ?>

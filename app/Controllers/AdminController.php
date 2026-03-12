@@ -225,11 +225,21 @@ class AdminController
         $this->checkRole(['admin', 'gerente']);
         try {
             $promocoes = $this->promocaoService->getAll();
+            $role = session('user')['role'] ?? 'cliente';
+            
+            if (request()->header('HX-Request')) {
+                return view('components/promocoes_admin_table', [
+                    'promocoes' => $promocoes,
+                    'role'      => $role
+                ]);
+            }
+            
             $produtosList = $this->produtoService->getAtivos();
             
             return view('admin/promocoes/index', [
                 'promocoes' => $promocoes,
-                'produtosList' => $produtosList
+                'produtosList' => $produtosList,
+                'role' => $role
             ]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível listar as promoções');

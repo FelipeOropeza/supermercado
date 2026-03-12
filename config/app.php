@@ -54,5 +54,6 @@ return [
         \Core\Providers\ViewServiceProvider::class,
 
         \App\Providers\AppServiceProvider::class,
+        \App\Providers\MercureServiceProvider::class,
     ]
 ];

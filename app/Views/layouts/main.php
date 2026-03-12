@@ -23,6 +23,9 @@
     <?php $this->renderSection('content'); ?>
 
     <?php $this->include('partials/footer'); ?>
+
+    <!-- Custom Scripts -->
+    <?php $this->renderSection('scripts'); ?>
 </body>
 
 </html>
