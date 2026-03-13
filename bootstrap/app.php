@@ -5,6 +5,8 @@ declare(strict_types=1);
 // Configuração de Timezone
 date_default_timezone_set('America/Sao_Paulo');
 
+
+
 /*
 |--------------------------------------------------------------------------
 | Criando a Aplicação
@@ -16,6 +18,8 @@ date_default_timezone_set('America/Sao_Paulo');
 */
 
 $app = new \Core\Foundation\Application(realpath(__DIR__ . '/../'));
+define('STORAGE_PATH', realpath(__DIR__ . '/../storage'));
+
 
 /*
 |--------------------------------------------------------------------------
