@@ -13,12 +13,14 @@ Route::group(['prefix' => '/admin', 'middleware' => 'admin'], function () {
     Route::get('/categorias/{id}/edit', [AdminController::class, 'categoriasEdit'])->name('admin.categorias.edit');
     Route::post('/categorias/{id}/update', [AdminController::class, 'categoriasUpdate'])->name('admin.categorias.update');
     Route::post('/categorias/{id}', [AdminController::class, 'categoriasDestroy'])->name('admin.categorias.destroy');
+    Route::post('/categorias/{id}/restore', [AdminController::class, 'categoriasRestore'])->name('admin.categorias.restore');
     Route::get('/produtos', [AdminController::class, 'produtos'])->name('admin.produtos.index');
     Route::get('/produtos/create', [AdminController::class, 'produtosCreate'])->name('admin.produtos.create');
     Route::post('/produtos', [AdminController::class, 'produtosStore'])->name('admin.produtos.store');
     Route::get('/produtos/{id}/edit', [AdminController::class, 'produtosEdit'])->name('admin.produtos.edit');
     Route::post('/produtos/{id}/update', [AdminController::class, 'produtosUpdate'])->name('admin.produtos.update');
     Route::post('/produtos/{id}', [AdminController::class, 'produtosDestroy'])->name('admin.produtos.destroy');
+    Route::post('/produtos/{id}/restore', [AdminController::class, 'produtosRestore'])->name('admin.produtos.restore');
     Route::get('/promocoes', [AdminController::class, 'promocoes'])->name('admin.promocoes.index');
     Route::post('/promocoes', [AdminController::class, 'promocoesStore'])->name('admin.promocoes.store');
     Route::post('/promocoes/{id}/destroy', [AdminController::class, 'promocoesDestroy'])->name('admin.promocoes.destroy');

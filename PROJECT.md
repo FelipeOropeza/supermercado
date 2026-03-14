@@ -36,8 +36,8 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 ## 🛍️ Fase 4: Frente de Loja (Vitrine Pública)
 **Foco:** Navegação do usuário interessado nos produtos. Interface rápida e atraente.
 - [x] **Home Page (Folheto):** `HomeController` renderizando a view inicial. A interface deve consultar no BD todas as `promocoes` cuja `data_inicio` <= hoje e `data_fim` >= hoje com *destaque folheto = 1*.
-- [ ] **Listagem por Categoria:** Criar um menu ou filtro para o cliente listar "Apenas Frios", "Apenas Hortifruti", etc., exibindo os produtos do respectivo `categoria_id`.
-- [ ] **Busca:** Campo de busca textual por nome do produto usando simples *like* no backend e SQL paramétrico (segurança contra SQL Injection).
+- [x] **Listagem por Categoria:** Criar um menu ou filtro para o cliente listar "Apenas Frios", "Apenas Hortifruti", etc., exibindo os produtos do respectivo `categoria_id`.
+- [x] **Busca:** Campo de busca textual por nome do produto usando simples *like* no backend e SQL paramétrico (segurança contra SQL Injection).
 
 ---
 

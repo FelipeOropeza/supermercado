@@ -29,22 +29,9 @@
         </div>
     </div>
 
-    <!-- Main List (Table Design) -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative z-10">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left whitespace-nowrap">
-                <thead class="bg-white border-b border-gray-100 text-gray-400 text-[11px] font-black uppercase tracking-widest">
-                    <tr>
-                        <th class="py-6 px-6 w-16 text-center">Home</th>
-                        <th class="py-6 px-6">Produto em Oferta</th>
-                        <th class="py-6 px-6">Status da Campanha</th>
-                        <th class="py-6 px-6 text-right">Comparativo (R$)</th>
-                        <th class="py-6 px-8 w-24 text-right">Ação</th>
-                    </tr>
-                </thead>
-                <?php include __DIR__ . '/../../components/promocoes_admin_table.php'; ?>
-            </table>
-        </div>
+    <!-- Main List (Desktop Table & Mobile Cards via Component) -->
+    <div id="promocoes-container">
+        <?php include __DIR__ . '/../../components/promocoes_admin_table.php'; ?>
     </div>
 
     <!-- Modal: Agendar Promoção -->

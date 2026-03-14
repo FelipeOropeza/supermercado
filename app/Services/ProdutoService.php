@@ -39,13 +39,21 @@ class ProdutoService
         return $this->produtoModel->all();
     }
 
+    public function getAllWithTrashed(): array
+    {
+        return $this->produtoModel->withTrashed()->get();
+    }
+
     public function getAtivos(): array
     {
         return $this->produtoModel->where('ativo', '=', 1)->get();
     }
 
-    public function getById(int|string $id): ?Produto
+    public function getById(int|string $id, bool $withTrashed = false): ?Produto
     {
+        if ($withTrashed) {
+            return $this->produtoModel->withTrashed()->where('id', '=', $id)->first();
+        }
         return $this->produtoModel->find($id);
     }
 
@@ -75,8 +83,66 @@ class ProdutoService
         return $this->produtoModel->delete($id);
     }
 
+    public function restore(int|string $id): bool
+    {
+        $sql = "UPDATE produtos SET deleted_at = NULL WHERE id = :id";
+        $stmt = \Core\Database\Connection::getInstance()->prepare($sql);
+        return $stmt->execute(['id' => $id]);
+    }
+
     public function count(): int
     {
         return $this->produtoModel->count();
+    }
+
+    public function getByCategoria(int|string $id, ?int $limit = null): array
+    {
+        $query = $this->produtoModel
+            ->where('categoria_id', '=', $id)
+            ->where('ativo', '=', 1);
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Busca produtos por termo, categoria e ordenação
+     */
+    public function search(?string $term = null, ?int $categoria_id = null, ?string $orderBy = null): array
+    {
+        $query = $this->produtoModel->where('ativo', '=', 1);
+
+        if ($term) {
+            $query->where('nome', 'LIKE', "%{$term}%");
+        }
+
+        if ($categoria_id) {
+            $query->where('categoria_id', '=', $categoria_id);
+        }
+
+        if ($orderBy) {
+            switch ($orderBy) {
+                case 'preco_min':
+                    $query->orderBy('preco', 'ASC');
+                    break;
+                case 'preco_max':
+                    $query->orderBy('preco', 'DESC');
+                    break;
+                case 'nome':
+                    $query->orderBy('nome', 'ASC');
+                    break;
+                case 'mais_recentes':
+                default:
+                    $query->orderBy('created_at', 'DESC');
+                    break;
+            }
+        } else {
+            $query->orderBy('created_at', 'DESC');
+        }
+
+        return $query->get();
     }
 }

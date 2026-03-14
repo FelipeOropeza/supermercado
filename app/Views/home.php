@@ -28,13 +28,14 @@
     </div>
 </div>
 
-<!-- Seção: Produtos (Dinâmica via Promoções) -->
+<!-- Seção: Ofertas -->
 <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
-    <h2 id="folheto" class="text-2xl font-bold flex items-center gap-2 text-gray-800 mb-8 border-b pb-4">
-        🔥 Ofertas em Destaque
+    <h2 id="folheto" class="text-2xl font-black flex items-center gap-3 text-gray-900 mb-10 border-b-2 border-red-500 pb-5 w-fit">
+        <span class="text-4xl animate-pulse">🔥</span> 
+        Ofertas Imperdíveis
     </h2>
 
-    <!-- Grid de Produtos Reativo -->
+    <!-- Grid de Produtos Reativo (Somente Promoções) -->
     <?php include __DIR__ . '/components/promocoes_grid.php'; ?>
 </main>
 <?php $this->endSection(); ?>

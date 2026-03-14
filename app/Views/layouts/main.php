@@ -26,6 +26,54 @@
 
     <!-- Custom Scripts -->
     <?php $this->renderSection('scripts'); ?>
+
+    <?= mercure_listen('supermercado/produtos', 'refresh-products') ?>
+    <?= mercure_listen('supermercado/categorias', 'refresh-categorias') ?>
+
+    <script>
+        // Listener para Produtos
+        document.body.addEventListener('refresh-products', (e) => {
+            const { action, id } = e.detail;
+            console.log("Evento Produto:", action, id);
+
+            if (action === 'deleted') {
+                const el = document.getElementById('produto-card-' + id);
+                if (el) {
+                    el.style.transition = 'all 0.5s ease-out';
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.9) translateY(20px)';
+                    setTimeout(() => el.remove(), 550);
+                }
+            } else if (action === 'restored') {
+                location.reload();
+            }
+        });
+
+        // Listener para Categorias
+        document.body.addEventListener('refresh-categorias', (e) => {
+            const { action, id } = e.detail;
+            console.log("Evento Categoria:", action, id);
+
+            if (action === 'deleted') {
+                const el = document.getElementById('categoria-section-' + id);
+                if (el) {
+                    el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(30px)';
+                    el.style.maxHeight = el.scrollHeight + 'px';
+                    setTimeout(() => {
+                        el.style.maxHeight = '0';
+                        el.style.marginBottom = '0';
+                        el.style.paddingTop = '0';
+                        el.style.paddingBottom = '0';
+                    }, 50);
+                    setTimeout(() => el.remove(), 700);
+                }
+            } else if (action === 'restored') {
+                location.reload();
+            }
+        });
+    </script>
 </body>
 
 </html>

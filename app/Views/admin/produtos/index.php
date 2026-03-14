@@ -13,10 +13,39 @@
             Cadastrar Produto
         </button>
     </div>
+    
+    <!-- Alertas de Feedback -->
+    <?php if (session()->has('success')): ?>
+        <div class="mb-6 animate-fade-in-up">
+            <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl flex items-center gap-4 shadow-sm shadow-green-100">
+                <div class="bg-green-100 p-2 rounded-xl">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                </div>
+                <span class="font-bold text-sm"><?= session()->get('success') ?></span>
+                <?php session()->remove('success'); ?>
+            </div>
+        </div>
+    <?php endif; ?>
 
-    <!-- Data Table -->
+    <?php 
+    $errorMsg = errors('error') ?? errors('categoria_error');
+    if ($errorMsg): 
+    ?>
+        <div class="mb-6 animate-fade-in-up">
+            <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center gap-4 shadow-sm shadow-red-100">
+                <div class="bg-red-100 p-2 rounded-xl">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                </div>
+                <span class="font-bold text-sm uppercase tracking-tight"><?= $errorMsg ?></span>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Data Table & Mobile Cards Container -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative z-10">
-        <div class="overflow-x-auto">
+        
+        <!-- Desktop Table View -->
+        <div class="overflow-x-auto hidden md:block">
             <table class="w-full text-left whitespace-nowrap">
                 <thead class="bg-white border-b border-gray-100 text-gray-400 text-[11px] font-black uppercase tracking-widest">
                     <tr>
@@ -65,12 +94,16 @@
                                             <?= htmlspecialchars($produto->nome) ?>
                                         </div>
                                         <div class="flex items-center">
-                                            <?php if ($produto->ativo): ?>
+                                            <?php if ($produto->deleted_at): ?>
+                                                <span class="inline-flex items-center gap-1 text-[9px] font-black text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100 uppercase tracking-widest" title="O produto foi excluído logicamente. Use o botão restaurar para torná-lo ativo novamente.">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> Sistema: Excluído
+                                                </span>
+                                            <?php elseif ($produto->ativo): ?>
                                                 <span class="inline-flex items-center gap-1 text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 uppercase tracking-widest">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Produto Ativo
                                                 </span>
                                             <?php else: ?>
-                                                <span class="inline-flex items-center gap-1 text-[9px] font-black text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 uppercase tracking-widest" title="O produto está inativo. Não será vista pelo cliente na loja.">
+                                                <span class="inline-flex items-center gap-1 text-[9px] font-black text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 uppercase tracking-widest" title="O produto está inativo. Não será visto pelo cliente na loja.">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Produto Oculto
                                                 </span>
                                             <?php endif; ?>
@@ -82,9 +115,9 @@
                                         <?= htmlspecialchars($produto->categoria->nome ?? '-') ?>
                                      </span>
                                 </td>
-                                <td class="py-5 px-6 text-right">
+                                <td class="py-5 px-6 text-right text-gray-900 font-black">
                                     <div class="inline-flex flex-col items-end">
-                                        <span class="text-base font-black <?= $produto->estoque > 0 ? 'text-gray-900' : 'text-red-500' ?>"><?= $produto->estoque ?></span>
+                                        <span class="text-base <?= $produto->estoque > 0 ? 'text-gray-900' : 'text-red-500' ?>"><?= $produto->estoque ?></span>
                                         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Unidades</span>
                                     </div>
                                 </td>
@@ -106,12 +139,21 @@
                                             <?php endif; ?>
 
                                             <?php if ($role === 'admin'): ?>
-                                                <form action="<?= route('admin.produtos.destroy', ['id' => $produto->id]) ?>" method="POST" class="inline-block" onsubmit="return confirm('Deseja realmente remover este produto?')">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="text-gray-400 bg-white border border-gray-200 shadow-sm hover:text-red-500 hover:border-red-200 transition-all p-2.5 rounded-xl hover:bg-red-50 active:scale-95 group/btn" title="Remover Produto">
-                                                        <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                    </button>
-                                                </form>
+                                                <?php if ($produto->deleted_at): ?>
+                                                    <form action="<?= route('admin.produtos.restore', ['id' => $produto->id]) ?>" method="POST" class="inline-block">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit" class="text-orange-500 bg-white border border-orange-200 shadow-sm hover:text-orange-600 hover:border-orange-300 transition-all p-2.5 rounded-xl hover:bg-orange-50 active:scale-95 group/btn" title="Restaurar Produto">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                                        </button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <form action="<?= route('admin.produtos.destroy', ['id' => $produto->id]) ?>" method="POST" class="inline-block" onsubmit="return confirm('Deseja realmente remover este produto?')">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit" class="text-gray-400 bg-white border border-gray-200 shadow-sm hover:text-red-500 hover:border-red-200 transition-all p-2.5 rounded-xl hover:bg-red-50 active:scale-95 group/btn" title="Remover Produto">
+                                                            <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -122,13 +164,93 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Card View -->
+        <div class="md:hidden divide-y divide-gray-100">
+            <?php if (empty($produtos)): ?>
+                <div class="py-20 px-6 text-center">
+                    <p class="text-gray-500 font-medium">Nenhum produto cadastrado.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($produtos as $produto): ?>
+                    <div class="p-5 flex flex-col gap-4">
+                        <div class="flex items-center gap-4">
+                            <?php if ($produto->imagem_url): ?>
+                                <div class="w-14 h-14 rounded-2xl border border-gray-100 overflow-hidden shadow-sm shrink-0">
+                                    <img src="<?= storage_url($produto->imagem_url) ?>" class="w-full h-full object-cover">
+                                </div>
+                            <?php else: ?>
+                                <div class="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-300 shrink-0">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-black text-gray-900 truncate"><?= htmlspecialchars($produto->nome) ?></h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold text-gray-500 px-2 py-0.5 bg-gray-50 rounded border border-gray-100 uppercase"><?= htmlspecialchars($produto->categoria->nome ?? '-') ?></span>
+                                    <?php if ($produto->deleted_at): ?>
+                                        <span class="text-[9px] font-black text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100 uppercase tracking-widest">Excluído</span>
+                                    <?php elseif ($produto->ativo): ?>
+                                        <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 uppercase tracking-widest">Ativo</span>
+                                    <?php else: ?>
+                                        <span class="text-[9px] font-black text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 uppercase tracking-widest">Oculto</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                <div class="text-green-600 font-black text-sm leading-none">R$ <?= number_format($produto->preco, 2, ',', '.') ?></div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1"><?= $produto->estoque ?> un.</div>
+                            </div>
+                        </div>
+
+                        <?php if ($role !== 'funcionario'): ?>
+                            <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
+                                <?php if (in_array($role, ['admin', 'gerente'])): ?>
+                                    <button hx-get="<?= route('admin.produtos.edit', ['id' => $produto->id]) ?>" hx-target="#modal-container" hx-swap="innerHTML" class="flex-1 bg-white border border-gray-200 text-gray-700 font-bold text-[11px] uppercase tracking-wider py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        Editar
+                                    </button>
+                                <?php endif; ?>
+
+                                <?php if ($role === 'admin'): ?>
+                                    <?php if ($produto->deleted_at): ?>
+                                        <form action="<?= route('admin.produtos.restore', ['id' => $produto->id]) ?>" method="POST" class="flex-1">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="w-full bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider py-2.5 rounded-xl shadow-sm flex items-center justify-center gap-2">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                                Restaurar
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <form action="<?= route('admin.produtos.destroy', ['id' => $produto->id]) ?>" method="POST" class="flex-1" onsubmit="return confirm('Excluir este produto?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="w-full bg-red-50 border border-red-100 text-red-600 font-bold text-[11px] uppercase tracking-wider py-2.5 rounded-xl shadow-sm flex items-center justify-center gap-2">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                Excluir
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
 
     <!-- Modal Container HTMX -->
     <div id="modal-container"></div>
 
     <!-- Modais de Erro Direto na Página (Fallback pra não perder preenchimento em validation error) -->
-    <?php if (!empty(errors())): ?>
+    <?php 
+    $formErrors = errors();
+    // Remove erros globais que são exibidos fora dos modais
+    unset($formErrors['error'], $formErrors['categoria_error']);
+    if (!empty($formErrors)): 
+    ?>
         <?php if (empty(old('id'))): ?>
             <?= $this->include('admin/produtos/modals/create', ['categoriasList' => $categoriasList]) ?>
         <?php else: ?>

@@ -10,14 +10,16 @@
                 </a>
 
                 <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
-                    <a href="/" class="border-green-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                    <?php 
+                        $uri = $_SERVER['REQUEST_URI'] ?? '/'; 
+                        $isHome = ($uri == '/' || $uri == '');
+                        $isProdutos = str_contains($uri, '/produtos') || str_contains($uri, '/categoria');
+                    ?>
+                    <a href="/" class="<?= $isHome ? 'border-green-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' ?> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition">
                         Promoções (Folheto)
                     </a>
-                    <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                    <a href="/produtos" class="<?= $isProdutos ? 'border-green-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' ?> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition">
                         Produtos
-                    </a>
-                    <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        Categorias
                     </a>
                 </div>
             </div>

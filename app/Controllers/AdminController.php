@@ -59,7 +59,7 @@ class AdminController
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
         try {
-            $categorias = $this->categoriaService->getAll();
+            $categorias = $this->categoriaService->getAll(true);
             return view('admin/categorias/index', ['categorias' => $categorias]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível listar as categorias');
@@ -82,7 +82,7 @@ class AdminController
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
         try {
-            $categoria = $this->categoriaService->getById($id);
+            $categoria = $this->categoriaService->getById($id, true);
             return view('admin/categorias/modals/edit', ['categoria' => $categoria]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível editar a categoria');
@@ -108,13 +108,43 @@ class AdminController
     {
         $this->checkRole(['admin']);
         try {
-            $this->categoriaService->delete($id);
+            $affectedProductIds = $this->categoriaService->delete($id);
+            
+            // Notifica Mercure para cada produto que foi "escondido" pela remoção da categoria
+            foreach ($affectedProductIds as $pid) {
+                broadcast('supermercado/produtos', ['action' => 'deleted', 'id' => $pid]);
+            }
+
+            // Notifica Mercure sobre a categoria em si
+            broadcast('supermercado/categorias', ['action' => 'deleted', 'id' => $id]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível excluir a categoria');
             return Response::makeRedirect('/admin/categorias');
         }
 
-        session()->set('success', 'Categoria excluída com sucesso!');
+        session()->set('success', 'Categoria e produtos vinculados foram suspensos!');
+        return Response::makeRedirect('/admin/categorias');
+    }
+
+    public function categoriasRestore(int|string $id): Response
+    {
+        $this->checkRole(['admin', 'gerente']);
+        try {
+            $affectedProductIds = $this->categoriaService->restore($id);
+            
+            // Notifica Mercure sobre os produtos restaurados
+            foreach ($affectedProductIds as $pid) {
+                broadcast('supermercado/produtos', ['action' => 'restored', 'id' => $pid]);
+            }
+
+            // Notifica Mercure sobre a categoria restaurada
+            broadcast('supermercado/categorias', ['action' => 'restored', 'id' => $id]);
+        } catch (\Exception $e) {
+            fail_validation('error', 'Não foi possível restaurar a categoria');
+            return Response::makeRedirect('/admin/categorias');
+        }
+
+        session()->set('success', 'Categoria e produtos foram restaurados com sucesso!');
         return Response::makeRedirect('/admin/categorias');
     }
 
@@ -136,7 +166,7 @@ class AdminController
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
         try {
-            $produtos = $this->produtoService->getAll();
+            $produtos = $this->produtoService->getAllWithTrashed();
             $categoriasList = $this->categoriaService->getAll();
             
             return view('admin/produtos/index', [
@@ -179,7 +209,7 @@ class AdminController
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
         try {
-            $produto        = $this->produtoService->getById($id);
+            $produto        = $this->produtoService->getById($id, true);
             $categoriasList = $this->categoriaService->getAll();
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível editar o produto');
@@ -211,12 +241,49 @@ class AdminController
         $this->checkRole(['admin']);
         try {
             $this->produtoService->delete($id);
+            // Notifica os clientes via Mercure para esconder o produto
+            broadcast('supermercado/produtos', ['action' => 'deleted', 'id' => $id]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível excluir o produto');
             return Response::makeRedirect('/admin/produtos');
         }
 
         session()->set('success', 'Produto excluído com sucesso!');
+        return Response::makeRedirect('/admin/produtos');
+    }
+
+    public function produtosRestore(int|string $id): Response
+    {
+        $this->checkRole(['admin', 'gerente']);
+        try {
+            // Busca o produto (incluindo deletados) para verificar a categoria
+            $produto = $this->produtoService->getById($id);
+            // Se o getById não trouxer (porque está deletado), usamos um método que traga
+            if (!$produto) {
+                // Como getById usa find() que filtra soft deletes, precisamos de um que não filtre
+                $db = \Core\Database\Connection::getInstance();
+                $stmt = $db->prepare("SELECT categoria_id FROM produtos WHERE id = ?");
+                $stmt->execute([$id]);
+                $pData = $stmt->fetch(\PDO::FETCH_ASSOC);
+                
+                if ($pData) {
+                    $categoria = $this->categoriaService->getById($pData['categoria_id'], true);
+                    if ($categoria && $categoria->deleted_at) {
+                        fail_validation('categoria_error', "Não é possível restaurar o produto pois a categoria '{$categoria->nome}' está suspensa. Restaure a categoria primeiro.");
+                        return Response::makeRedirect('/admin/produtos');
+                    }
+                }
+            }
+
+            $this->produtoService->restore($id);
+            // Notifica os clientes via Mercure para mostrar o produto novamente
+            broadcast('supermercado/produtos', ['action' => 'restored', 'id' => $id]);
+        } catch (\Exception $e) {
+            fail_validation('categoria_error', 'Não foi possível restaurar o produto');
+            return Response::makeRedirect('/admin/produtos');
+        }
+
+        session()->set('success', 'Produto restaurado com sucesso!');
         return Response::makeRedirect('/admin/produtos');
     }
 

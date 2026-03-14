@@ -14,6 +14,7 @@ class CreateCategoriasTable
             $table->string('nome');
             $table->text('descricao')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

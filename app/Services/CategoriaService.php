@@ -30,7 +30,7 @@ class CategoriaService
         return $categoriaID;
     }
 
-    public function delete(int|string $id): void
+    public function delete(int|string $id): array
     {
         $categoria = $this->categoriaModel->find($id);
 
@@ -38,16 +38,55 @@ class CategoriaService
             throw new \Exception('Categoria não encontrada');
         }
 
+        // Busca IDs dos produtos que serão afetados
+        $db = \Core\Database\Connection::getInstance();
+        $stmtIds = $db->prepare("SELECT id FROM produtos WHERE categoria_id = ? AND deleted_at IS NULL");
+        $stmtIds->execute([$id]);
+        $productIds = $stmtIds->fetchAll(\PDO::FETCH_COLUMN);
+
+        // Soft delete na categoria
         $this->categoriaModel->delete($id);
+
+        // Cascata: Soft delete nos produtos desta categoria
+        $stmt = $db->prepare("UPDATE produtos SET deleted_at = NOW() WHERE categoria_id = ? AND deleted_at IS NULL");
+        $stmt->execute([$id]);
+
+        return $productIds;
     }
 
-    public function getById(int|string $id): ?Categoria
+    public function restore(int|string $id): array
     {
+        $db = \Core\Database\Connection::getInstance();
+        
+        // Busca IDs dos produtos que serão afetados (restaurados)
+        $stmtIds = $db->prepare("SELECT id FROM produtos WHERE categoria_id = ? AND deleted_at IS NOT NULL");
+        $stmtIds->execute([$id]);
+        $productIds = $stmtIds->fetchAll(\PDO::FETCH_COLUMN);
+
+        // Restaura a categoria
+        $stmt = $db->prepare("UPDATE categorias SET deleted_at = NULL WHERE id = ?");
+        $stmt->execute([$id]);
+
+        // Cascata: Restaura os produtos desta categoria
+        $stmtProducts = $db->prepare("UPDATE produtos SET deleted_at = NULL WHERE categoria_id = ?");
+        $stmtProducts->execute([$id]);
+
+        return $productIds;
+    }
+
+    public function getById(int|string $id, bool $withTrashed = false): ?Categoria
+    {
+        if ($withTrashed) {
+            return $this->categoriaModel->withTrashed()->where('id', '=', $id)->first();
+        }
         return $this->categoriaModel->find($id);
     }
 
-    public function getAll(): array
+    public function getAll(bool $withTrashed = false): array
     {
+        if ($withTrashed) {
+            return $this->categoriaModel->withTrashed()->get();
+        }
         return $this->categoriaModel->all();
     }
 

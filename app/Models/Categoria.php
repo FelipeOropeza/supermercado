@@ -13,6 +13,8 @@ class Categoria extends Model
         'descricao'
     ];
 
+    public bool $softDeletes = true;
+
     public function produtos()
     {
         return $this->hasMany(Produto::class, 'categoria_id');
