@@ -8,6 +8,7 @@ use Core\Attributes\Route\Get;
 use App\Services\CategoriaService;
 use App\Services\ProdutoService;
 use App\Models\Promocao;
+use Core\Attributes\Route\Middleware;
 
 class HomeController extends Controller
 {
@@ -21,6 +22,7 @@ class HomeController extends Controller
     }
 
     #[Get('/')]
+    #[Middleware('auth')]
     public function index()
     {
         // Se for uma requisição do HTMX pedindo apenas a lista
@@ -54,6 +56,7 @@ class HomeController extends Controller
      * Lista todos os produtos agrupados por categoria
      */
     #[Get('/produtos')]
+    #[Middleware('auth')]
     public function produtos()
     {
         $today = date('Y-m-d H:i:s');
@@ -105,6 +108,7 @@ class HomeController extends Controller
      * Lista produtos por categoria
      */
     #[Get('/categoria/{id}')]
+    #[Middleware('auth')]
     public function categoria(int $id)
     {
         $categoria = $this->categoriaService->getById($id);
@@ -149,6 +153,7 @@ class HomeController extends Controller
      * Busca global de produtos
      */
     #[Get('/busca')]
+    #[Middleware('auth')]
     public function busca()
     {
         $term = request()->get('q', '');
@@ -188,6 +193,7 @@ class HomeController extends Controller
      * Exibe detalhes de um produto específico
      */
     #[Get('/produto/{id}')]
+    #[Middleware('auth')]
     public function visualizar(int $id)
     {
         $produto = $this->produtoService->getById($id);

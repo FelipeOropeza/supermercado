@@ -3,6 +3,7 @@
     $uri = $_SERVER['REQUEST_URI'] ?? '/'; 
     $isHome = ($uri == '/' || $uri == '');
     $isProdutos = str_contains($uri, '/produtos') || str_contains($uri, '/categoria');
+    $cartCount = session()->has('user') ? app(\App\Services\CarrinhoService::class)->getCartCount(session('user')['id']) : 0;
 ?>
 
 <nav class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 transition-all duration-300" id="main-nav">
@@ -35,14 +36,11 @@
             <!-- Right Actions -->
             <div class="flex items-center gap-2 sm:gap-4">
                 <!-- Cart -->
-                <a href="#" class="relative p-2.5 text-gray-700 hover:bg-gray-50 rounded-sm transition-colors group">
+                <a href="<?= route('carrinho') ?>" class="relative p-2.5 text-gray-700 hover:bg-gray-50 rounded-sm transition-colors group">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
-                    <span class="absolute top-1 right-1 flex h-4 w-4">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-600 text-[10px] font-bold text-white items-center justify-center">0</span>
-                    </span>
+                    <?php include __DIR__ . '/../carrinho/partials/cart_badge.php'; ?>
                 </a>
 
                 <!-- User Profile / Auth -->

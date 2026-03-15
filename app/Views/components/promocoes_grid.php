@@ -25,7 +25,7 @@
                 <!-- Product Image -->
                 <div class="relative aspect-square overflow-hidden bg-gray-50 border border-gray-100 rounded-sm mb-6">
                     <?php if (!empty($produto->imagem_url)): ?>
-                        <img src="<?= $produto->imagem_url ?>" 
+                        <img src="<?= storage_url($produto->imagem_url) ?>" 
                              alt="<?= htmlspecialchars($produto->nome) ?>" 
                              class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 p-6">
                     <?php else: ?>

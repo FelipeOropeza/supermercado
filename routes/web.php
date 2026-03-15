@@ -14,3 +14,6 @@ require_once __DIR__ . '/auth.php';
 
 // Inclui Rotas do Painel Administrativo
 require_once __DIR__ . '/admin.php';
+
+// Inclui Rotas do Carrinho
+require_once __DIR__ . '/cart.php';

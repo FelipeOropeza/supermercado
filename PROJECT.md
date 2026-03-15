@@ -43,7 +43,7 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 
 ## 🛒 Fase 5: Operação de Compra (Carrinho e Checkout)
 **Foco:** Fazer o cliente adicionar produtos para poder pagar. Lógica pura!
-- [ ] **Controlador de Carrinho:** Rotas de *Ação* (add_item, upd_item, rm_item). 
+- [x] **Controlador de Carrinho:** Rotas de *Ação* (add_item, upd_item, rm_item). 
 - [ ] **Sessões e BD:** Vincular o Carrinho a tabela `carrinhos` juntamente com `carrinho_itens` apontando para o id do `Usuario`.
 - [ ] **Revisão:** Telinha para revisão final exibindo endereço selecionado + o combo de "Método de Pagamento da Entrega" (ex: Dinheiro ou Maquininha), pedindo a informação de "Qual o seu troco?".
 - [ ] **Finalizar Compra:** Pegar os itens do Carrinho -> Inseri-los como `pedidos` (congelar o valor original individual dos produtos em seu registro) ->  Limpar os `carrinho_itens`.
