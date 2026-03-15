@@ -12,9 +12,11 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Rotas protegidas do Usuário
+// Rotas protegidas do Usuario
 Route::group(['prefix' => '/minha-conta', 'middleware' => 'auth'], function () {
     Route::get('/', [UsuarioController::class, 'profile'])->name('minha-conta');
+    Route::get('/pedidos', [UsuarioController::class, 'pedidos'])->name('minha-conta.pedidos');
+    Route::get('/pedido/{id}', [UsuarioController::class, 'visualizarPedido'])->name('minha-conta.pedido.view');
     Route::get('/enderecos/novo', [UsuarioController::class, 'createEndereco'])->name('enderecos.create');
     Route::post('/enderecos/novo', [UsuarioController::class, 'storeEndereco'])->name('enderecos.store');
     Route::get('/enderecos/editar/{id}', [UsuarioController::class, 'editEndereco'])->name('enderecos.edit');

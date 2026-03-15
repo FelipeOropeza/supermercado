@@ -17,3 +17,6 @@ require_once __DIR__ . '/admin.php';
 
 // Inclui Rotas do Carrinho
 require_once __DIR__ . '/cart.php';
+
+// Inclui Rotas de Checkout
+require_once __DIR__ . '/checkout.php';

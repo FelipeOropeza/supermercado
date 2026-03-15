@@ -10,10 +10,12 @@ use App\DTOs\Usuario\EnderecoDTO;
 class UsuarioController extends Controller
 {
     private EnderecoService $enderecoService;
+    private \App\Services\PedidoService $pedidoService;
 
     public function __construct()
     {
         $this->enderecoService = new EnderecoService();
+        $this->pedidoService = app(\App\Services\PedidoService::class);
     }
 
     /**
@@ -25,7 +27,40 @@ class UsuarioController extends Controller
         $enderecos = $this->enderecoService->listByUsuario($usuarioId);
 
         return view('account/index', [
-            'enderecos' => $enderecos
+            'enderecos' => $enderecos,
+            'tab' => 'enderecos'
+        ]);
+    }
+
+    /**
+     * Lista os pedidos do usuário
+     */
+    public function pedidos()
+    {
+        $usuarioId = session('user')['id'];
+        $pedidos = $this->pedidoService->getPedidosUsuario($usuarioId);
+
+        return view('account/index', [
+            'pedidos' => $pedidos,
+            'tab' => 'pedidos'
+        ]);
+    }
+
+    /**
+     * Exibe os detalhes de um pedido específico
+     */
+    public function visualizarPedido(int $id)
+    {
+        $usuarioId = session('user')['id'];
+        $pedido = $this->pedidoService->getPedidoWithItens($id, $usuarioId);
+
+        if (!$pedido) {
+            session()->set('error', 'Pedido não encontrado.');
+            return Response::makeRedirect('/minha-conta/pedidos');
+        }
+
+        return view('account/pedidos/view', [
+            'pedido' => $pedido
         ]);
     }
 

@@ -44,15 +44,15 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 ## 🛒 Fase 5: Operação de Compra (Carrinho e Checkout)
 **Foco:** Fazer o cliente adicionar produtos para poder pagar. Lógica pura!
 - [x] **Controlador de Carrinho:** Rotas de *Ação* (add_item, upd_item, rm_item). 
-- [ ] **Sessões e BD:** Vincular o Carrinho a tabela `carrinhos` juntamente com `carrinho_itens` apontando para o id do `Usuario`.
-- [ ] **Revisão:** Telinha para revisão final exibindo endereço selecionado + o combo de "Método de Pagamento da Entrega" (ex: Dinheiro ou Maquininha), pedindo a informação de "Qual o seu troco?".
-- [ ] **Finalizar Compra:** Pegar os itens do Carrinho -> Inseri-los como `pedidos` (congelar o valor original individual dos produtos em seu registro) ->  Limpar os `carrinho_itens`.
+- [x] **Sessões e BD:** Vincular o Carrinho a tabela `carrinhos` juntamente com `carrinho_itens` apontando para o id do `Usuario`.
+- [x] **Revisão:** Telinha para revisão final exibindo endereço selecionado + o combo de "Método de Pagamento da Entrega" (ex: Dinheiro ou Maquininha), pedindo a informação de "Qual o seu troco?".
+- [x] **Finalizar Compra:** Pegar os itens do Carrinho -> Inseri-los como `pedidos` (congelar o valor original individual dos produtos em seu registro) ->  Limpar os `carrinho_itens`.
 
 ---
 
 ## 🚚 Fase 6: Logística e Monitoramento dos Encomendas
 **Foco:** Fluxos diários de andamento para o cliente e gestor.
-- [ ] **Acompanhamento no Front (Cliente):** O usuário deve acessar a guia "Meus Pedidos" e ver em qual *status* o pedido recém efetuado dele está, junto aos itens.
+- [x] **Acompanhamento no Front (Cliente):** O usuário deve acessar a guia "Meus Pedidos" e ver em qual *status* o pedido recém efetuado dele está, junto aos itens.
 - [ ] **Quadro Operacional Diário (Admin):** Uma tela estilo "Kanban" no Admin para enxergar pedidos `pendentes`.  
 - [ ] O funcionário aprova, mandando o status para `separacao` ou cancelando. 
 - [ ] Quando despachar, muda para `saiu_entrega` (sinalizando a maquininha ou o exato troco anotado pro motoboy)
