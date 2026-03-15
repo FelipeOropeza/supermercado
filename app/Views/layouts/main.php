@@ -44,7 +44,7 @@
                     el.style.transform = 'scale(0.9) translateY(20px)';
                     setTimeout(() => el.remove(), 550);
                 }
-            } else if (action === 'restored') {
+            } else if (action === 'restored' || action === 'created' || action === 'updated') {
                 location.reload();
             }
         });

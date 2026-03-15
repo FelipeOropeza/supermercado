@@ -195,7 +195,9 @@ class AdminController
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
         try {
-            $this->produtoService->create($dto);
+            $id = $this->produtoService->create($dto);
+            // Notifica os clientes via Mercure sobre o novo produto
+            broadcast('supermercado/produtos', ['action' => 'created', 'id' => $id]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível criar o produto');
             return Response::makeRedirect('/admin/produtos');
@@ -227,6 +229,8 @@ class AdminController
         $this->checkRole(['admin', 'gerente']);
         try {
             $this->produtoService->update($id, $dto);
+            // Notifica os clientes via Mercure sobre o produto atualizado
+            broadcast('supermercado/produtos', ['action' => 'updated', 'id' => $id]);
         } catch (\Exception $e) {
             fail_validation('error', 'Não foi possível atualizar o produto');
             return Response::makeRedirect('/admin/produtos');
