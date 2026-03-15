@@ -1,72 +1,161 @@
-<!-- Navbar -->
-<nav class="bg-white shadow">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <!-- Logo e Links em Detalhe -->
-            <div class="flex items-center">
-                <a href="/" class="flex-shrink-0 flex items-center gap-2">
-                    <span class="text-2xl">🛒</span>
-                    <span class="font-bold text-xl text-green-700 tracking-tight">Supermercado</span>
-                </a>
+<!-- Navbar Premium Minimal -->
+<?php 
+    $uri = $_SERVER['REQUEST_URI'] ?? '/'; 
+    $isHome = ($uri == '/' || $uri == '');
+    $isProdutos = str_contains($uri, '/produtos') || str_contains($uri, '/categoria');
+?>
 
-                <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
-                    <?php 
-                        $uri = $_SERVER['REQUEST_URI'] ?? '/'; 
-                        $isHome = ($uri == '/' || $uri == '');
-                        $isProdutos = str_contains($uri, '/produtos') || str_contains($uri, '/categoria');
-                    ?>
-                    <a href="/" class="<?= $isHome ? 'border-green-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' ?> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition">
-                        Promoções (Folheto)
-                    </a>
-                    <a href="/produtos" class="<?= $isProdutos ? 'border-green-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' ?> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition">
-                        Produtos
-                    </a>
-                </div>
+<nav class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 transition-all duration-300" id="main-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            
+            <!-- Logo Section -->
+            <div class="flex items-center">
+                <a href="/" class="group flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-900 rounded-sm flex items-center justify-center text-white text-xl transition-transform group-hover:scale-110">
+                        🛒
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xl text-emerald-950 leading-none tracking-tight">SUPERMERCADO</span>
+                        <span class="text-[10px] text-emerald-600 font-bold tracking-[0.2em] uppercase mt-1">Digital & Fresco</span>
+                    </div>
+                </a>
             </div>
 
-            <!-- Lado Direito: Ações / Login -->
-            <div class="flex items-center space-x-4">
-                <!-- Carrinho Ícone com Badge (Mock) -->
-                <a href="#" class="relative p-2 text-gray-600 hover:text-green-600 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-10">
+                <a href="/" class="<?= $isHome ? 'text-emerald-950 font-bold' : 'text-gray-500 hover:text-emerald-800' ?> text-sm font-medium transition-colors">
+                    Promoções
+                </a>
+                <a href="/produtos" class="<?= $isProdutos ? 'text-emerald-950 font-bold' : 'text-gray-500 hover:text-emerald-800' ?> text-sm font-medium transition-colors">
+                    Todos os Produtos
+                </a>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Cart -->
+                <a href="#" class="relative p-2.5 text-gray-700 hover:bg-gray-50 rounded-sm transition-colors group">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
-                    <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">0</span>
+                    <span class="absolute top-1 right-1 flex h-4 w-4">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-600 text-[10px] font-bold text-white items-center justify-center">0</span>
+                    </span>
                 </a>
 
-                <!-- Autenticação Dinâmica -->
-                <?php if (session()->has('user')): ?>
-                    <div class="hidden sm:flex items-center space-x-6 border-l pl-6 border-gray-200">
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs text-gray-400 capitalize"><?= htmlspecialchars(session('user')['role'] ?? 'Cliente') ?></span>
-                            <span class="text-sm font-bold text-gray-700">Olá, <?= htmlspecialchars(explode(' ', session('user')['nome'])[0]) ?></span>
+                <!-- User Profile / Auth -->
+                <div class="hidden sm:flex items-center pl-4 border-l border-gray-100 gap-4">
+                    <?php if (session()->has('user')): ?>
+                        <div class="flex flex-col items-end mr-2">
+                            <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider"><?= htmlspecialchars(session('user')['role'] ?? 'Cliente') ?></span>
+                            <span class="text-sm font-bold text-emerald-950 leading-none"><?= htmlspecialchars(explode(' ', session('user')['nome'])[0]) ?></span>
                         </div>
-
-                        <div class="flex items-center gap-4">
-                            <a href="<?= route('minha-conta') ?>" class="text-sm text-green-600 hover:text-green-800 font-semibold transition">Minha Conta</a>
-
-                            <form action="<?= route('logout') ?>" method="POST" class="inline">
-                                <?= csrf_field() ?>
-                                <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-full transition title=" Sair">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <div class="hidden sm:flex items-center space-x-2">
-                        <a href="<?= route('login') ?>" class="text-gray-600 hover:text-green-600 px-3 py-2 text-sm font-medium transition flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        <a href="<?= route('minha-conta') ?>" class="p-2.5 text-gray-700 hover:bg-gray-50 rounded-sm transition-colors border border-transparent hover:border-gray-100" title="Minha Conta">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
-                            Entrar
                         </a>
-                        <a href="<?= route('register') ?>" class="bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">Cadastre-se</a>
+
+                        <form action="<?= route('logout') ?>" method="POST" class="inline">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="p-2.5 text-red-500 hover:bg-red-50 rounded-sm transition-colors border border-transparent hover:border-red-100" title="Sair">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <a href="<?= route('login') ?>" class="text-sm font-bold text-emerald-950 hover:text-emerald-700 transition-colors">Entrar</a>
+                        <a href="<?= route('register') ?>" class="bg-emerald-900 text-white px-5 py-2.5 rounded-sm text-sm font-bold hover:bg-emerald-800 transition-all shadow-sm">Criar Conta</a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Hamburger Button (Mobile) -->
+                <button type="button" 
+                        onclick="toggleMobileMenu()"
+                        class="md:hidden p-2.5 text-emerald-950 hover:bg-emerald-50 rounded-sm transition-colors" 
+                        aria-controls="mobile-menu" 
+                        aria-expanded="false">
+                    <span class="sr-only">Abrir menu</span>
+                    <svg id="menu-icon-open" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                    <svg id="menu-icon-close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="md:hidden hidden bg-white border-t border-gray-50 overflow-hidden transition-all duration-300 ease-in-out" id="mobile-menu">
+        <div class="px-4 pt-4 pb-8 space-y-1">
+            <a href="/" class="block px-4 py-4 rounded-sm text-base font-bold <?= $isHome ? 'bg-emerald-50 text-emerald-900 border-l-4 border-emerald-900' : 'text-gray-600 hover:bg-gray-50' ?> transition-all">
+                Promoções
+            </a>
+            <a href="/produtos" class="block px-4 py-4 rounded-sm text-base font-bold <?= $isProdutos ? 'bg-emerald-50 text-emerald-900 border-l-4 border-emerald-900' : 'text-gray-600 hover:bg-gray-50' ?> transition-all">
+                Produtos
+            </a>
+            
+            <div class="pt-6 pb-2 border-t border-gray-50 mt-4">
+                <?php if (session()->has('user')): ?>
+                    <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Minha Conta</p>
+                    <a href="<?= route('minha-conta') ?>" class="block px-4 py-3 rounded-sm text-base font-medium text-gray-600 hover:bg-gray-50">Configurações</a>
+                    <form action="<?= route('logout') ?>" method="POST" class="block w-full">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="w-full text-left px-4 py-3 rounded-sm text-base font-medium text-red-600 hover:bg-red-50">Sair</button>
+                    </form>
+                <?php else: ?>
+                    <div class="grid grid-cols-2 gap-4 px-4 mt-4">
+                        <a href="<?= route('login') ?>" class="flex items-center justify-center px-4 py-3 rounded-sm border border-gray-200 text-sm font-bold text-emerald-950">Entrar</a>
+                        <a href="<?= route('register') ?>" class="flex items-center justify-center px-4 py-3 rounded-sm bg-emerald-900 text-sm font-bold text-white shadow-sm">Cadastrar</a>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 </nav>
+
+<script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const openIcon = document.getElementById('menu-icon-open');
+        const closeIcon = document.getElementById('menu-icon-close');
+        const isHidden = menu.classList.contains('hidden');
+
+        if (isHidden) {
+            menu.classList.remove('hidden');
+            setTimeout(() => {
+                menu.style.maxHeight = '1000px';
+                menu.style.opacity = '1';
+            }, 10);
+            openIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+        } else {
+            menu.style.maxHeight = '0px';
+            menu.style.opacity = '0';
+            setTimeout(() => {
+                menu.classList.add('hidden');
+            }, 300);
+            openIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+    }
+
+    // Shadow on scroll
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('main-nav');
+        if (window.scrollY > 10) {
+            nav.classList.add('shadow-xl', 'shadow-emerald-900/5');
+            nav.querySelector('.max-w-7xl').classList.remove('h-20');
+            nav.querySelector('.max-w-7xl').classList.add('h-16');
+        } else {
+            nav.classList.remove('shadow-xl', 'shadow-emerald-900/5');
+            nav.querySelector('.max-w-7xl').classList.remove('h-16');
+            nav.querySelector('.max-w-7xl').classList.add('h-20');
+        }
+    });
+</script>

@@ -7,10 +7,28 @@
     <title><?= htmlspecialchars($title ?? 'Supermercado Online') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --brand-green: #064e3b; /* Emerald 900 */
+            --brand-accent: #10b981; /* Emerald 500 */
+        }
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+        .premium-border {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .btn-premium {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
     </style>
 </head>

@@ -1,55 +1,76 @@
-<!-- Componente Reativo: promocoes_grid -->
+<!-- Componente Reativo: promocoes_grid (Redesenhado) -->
 <div id="comp-promocoes_grid" 
      hx-get="/" 
      hx-trigger="refresh-promocoes_grid from:body" 
      hx-swap="outerHTML"
-     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 transition-all">
+     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
     
     <?php if (empty($promocoes)): ?>
-        <div class="col-span-full text-center py-12 animate-fade-in">
-            <div class="text-6xl mb-4">⌛</div>
-            <p class="text-gray-500 text-xl">Novas promoções estão sendo preparadas. Volte logo!</p>
+        <div class="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-sm">
+            <div class="text-4xl mb-6 opacity-30">📦</div>
+            <p class="text-gray-400 font-medium text-lg">Nenhuma oferta disponível no momento.</p>
+            <p class="text-gray-400 text-sm mt-1">Estamos preparando novos preços especiais para você.</p>
         </div>
     <?php else: ?>
         <?php foreach ($promocoes as $promocao): ?>
             <?php $produto = $promocao->produto; ?>
-            <div id="promo-<?= $promocao->id ?>" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group animate-fade-in">
-                <div class="h-48 bg-gray-100 flex items-center justify-center text-5xl relative">
+            <div id="promo-<?= $promocao->id ?>" class="group flex flex-col h-full bg-white relative">
+                <!-- Badge de Promoção -->
+                <div class="absolute top-4 left-4 z-10">
+                    <span class="bg-red-600 text-[10px] font-black text-white px-2 py-1 rounded-sm tracking-widest uppercase shadow-lg shadow-red-600/20">
+                        OFF
+                    </span>
+                </div>
+
+                <!-- Product Image -->
+                <div class="relative aspect-square overflow-hidden bg-gray-50 border border-gray-100 rounded-sm mb-6">
                     <?php if (!empty($produto->imagem_url)): ?>
-                        <img src="<?= $produto->imagem_url ?>" alt="<?= htmlspecialchars($produto->nome) ?>" class="w-full h-full object-cover">
+                        <img src="<?= $produto->imagem_url ?>" 
+                             alt="<?= htmlspecialchars($produto->nome) ?>" 
+                             class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 p-6">
                     <?php else: ?>
-                        📦
+                        <div class="w-full h-full flex items-center justify-center text-4xl opacity-20">🛒</div>
                     <?php endif; ?>
-                    <div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                        AO VIVO
+                    
+                    <!-- Quick Hover Action (Optional) -->
+                    <div class="absolute inset-x-4 bottom-4 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                        <!-- Botão Flutuante (Add ao Carrinho rápido no Hover no futuro) -->
                     </div>
                 </div>
-                <div class="p-5">
-                    <div class="uppercase tracking-wide text-xs text-green-600 font-semibold mb-1">
-                        <?= ($produto->categoria())->nome ?? 'Geral' ?>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2 truncate" title="<?= htmlspecialchars($produto->nome) ?>">
+
+                <!-- Content -->
+                <div class="flex flex-col flex-grow">
+                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2">
+                         <?= ($produto->categoria())->nome ?? 'Geral' ?>
+                    </p>
+                    <h3 class="font-bold text-lg text-emerald-950 mb-3 line-clamp-2 leading-tight flex-grow" title="<?= htmlspecialchars($produto->nome) ?>">
                         <?= htmlspecialchars($produto->nome) ?>
                     </h3>
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="text-gray-400 line-through text-sm">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
-                        <span class="text-2xl font-extrabold text-red-600">R$ <?= number_format($promocao->preco_promocional, 2, ',', '.') ?></span>
-                    </div>
                     
+                    <div class="flex flex-col mb-6">
+                        <span class="text-xs text-gray-400 line-through mb-1 uppercase font-bold tracking-tighter">De: R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-xs font-bold text-red-600 uppercase">Por:</span>
+                            <span class="text-2xl font-black text-emerald-950 tracking-tighter">R$ <?= number_format($promocao->preco_promocional, 2, ',', '.') ?></span>
+                        </div>
+                    </div>
+
                     <?php if (!session()->has('user')): ?>
-                        <a href="/login" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition">
-                            Faça login para comprar
+                        <a href="/login" class="flex items-center justify-center w-full py-4 px-6 border border-gray-200 text-xs font-black text-emerald-900 uppercase tracking-widest hover:bg-emerald-50 transition-colors rounded-sm">
+                            Entrar para Comprar
                         </a>
                     <?php else: ?>
                         <button 
                             hx-post="/carrinho/add/<?= $produto->id ?>"
                             hx-swap="none"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"
+                            class="group/btn relative flex items-center justify-center w-full py-4 px-6 bg-emerald-950 text-white text-[11px] font-black uppercase tracking-[0.2em] overflow-hidden rounded-sm btn-premium"
                         >
-                            <span>Adicionar</span>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
+                            <span class="relative z-10 flex items-center gap-2">
+                                Adicionar
+                                <svg class="w-4 h-4 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </span>
                         </button>
                     <?php endif; ?>
                 </div>
@@ -58,5 +79,5 @@
     <?php endif; ?>
 </div>
 
-<!-- Antena Mercure Invisível (Padrão do Framework) -->
+<!-- Antena Mercure Invisível -->
 <?= mercure_listen('supermercado/promocoes', 'refresh-promocoes_grid') ?>
