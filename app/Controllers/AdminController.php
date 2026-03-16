@@ -50,11 +50,13 @@ class AdminController
         $totalCategorias = $this->categoriaService->count();
         $totalProdutos   = $this->produtoService->count();
         $totalPromocoes  = $this->promocaoService->count();
+        $produtosBaixoEstoque = $this->produtoService->getProdutosBaixoEstoque(10); // Alerta para <= 10 unidades
 
         return view('admin/dashboard', [
             'totalCategorias' => $totalCategorias,
             'totalProdutos'   => $totalProdutos,
             'totalPromocoes'  => $totalPromocoes,
+            'produtosBaixoEstoque' => $produtosBaixoEstoque
         ]);
     }
 
@@ -112,7 +114,7 @@ class AdminController
         $this->checkRole(['admin']);
         try {
             $affectedProductIds = $this->categoriaService->delete($id);
-            
+
             // Notifica Mercure para cada produto que foi "escondido" pela remoção da categoria
             foreach ($affectedProductIds as $pid) {
                 broadcast('supermercado/produtos', ['action' => 'deleted', 'id' => $pid]);
@@ -134,7 +136,7 @@ class AdminController
         $this->checkRole(['admin', 'gerente']);
         try {
             $affectedProductIds = $this->categoriaService->restore($id);
-            
+
             // Notifica Mercure sobre os produtos restaurados
             foreach ($affectedProductIds as $pid) {
                 broadcast('supermercado/produtos', ['action' => 'restored', 'id' => $pid]);
@@ -171,7 +173,7 @@ class AdminController
         try {
             $produtos = $this->produtoService->getAllWithTrashed();
             $categoriasList = $this->categoriaService->getAll();
-            
+
             return view('admin/produtos/index', [
                 'produtos'       => $produtos,
                 'categoriasList' => $categoriasList,
@@ -272,7 +274,7 @@ class AdminController
                 $stmt = $db->prepare("SELECT categoria_id FROM produtos WHERE id = ?");
                 $stmt->execute([$id]);
                 $pData = $stmt->fetch(\PDO::FETCH_ASSOC);
-                
+
                 if ($pData) {
                     $categoria = $this->categoriaService->getById($pData['categoria_id'], true);
                     if ($categoria && $categoria->deleted_at) {
@@ -300,16 +302,16 @@ class AdminController
         try {
             $promocoes = $this->promocaoService->getAll();
             $role = session('user')['role'] ?? 'cliente';
-            
+
             if (request()->header('HX-Request')) {
                 return view('components/promocoes_admin_table', [
                     'promocoes' => $promocoes,
                     'role'      => $role
                 ]);
             }
-            
+
             $produtosList = $this->produtoService->getAtivos();
-            
+
             return view('admin/promocoes/index', [
                 'promocoes' => $promocoes,
                 'produtosList' => $produtosList,
@@ -415,7 +417,7 @@ class AdminController
     public function acessosDestroy(int|string $id): Response
     {
         $this->checkRole(['admin']);
-        
+
         // Bloqueia exclusão do usuário root (ID 1)
         if ($id == 1) {
             fail_validation('error', 'O sistema não permite excluir o usuário raiz.');
@@ -436,7 +438,7 @@ class AdminController
     public function pedidos(): mixed
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
-        
+
         $filters = [
             'search' => request()->get('search'),
             'status' => request()->get('status'),
@@ -471,19 +473,28 @@ class AdminController
         ]);
     }
 
-    public function pedidosUpdateStatus(int|string $id): Response
+    public function pedidosUpdateStatus(int|string $id)
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
-        $status = request()->get('status');
-        
+        $status = trim((string)request()->get('status'));
+
         $validStatus = ['aguardando', 'separacao', 'saiu_entrega', 'entregue', 'cancelado'];
-        
+
         if (!in_array($status, $validStatus)) {
             session()->set('error', 'Status inválido.');
             return Response::makeRedirect('/admin/pedidos');
         }
 
         if ($this->pedidoService->updateStatus((int)$id, $status)) {
+            // Se o status for 'entregue', debita o estoque automaticamente
+            if ($status === 'entregue') {
+                $pedido = $this->pedidoService->getPedidoWithItens((int)$id);
+                if ($pedido && !empty($pedido->itens)) {
+                    foreach ($pedido->itens as $item) {
+                        $this->produtoService->debitarEstoque((int)$item->produto_id, (int)$item->quantidade);
+                    }
+                }
+            }
             session()->set('success', 'Status do pedido atualizado com sucesso!');
         } else {
             session()->set('error', 'Erro ao atualizar status.');

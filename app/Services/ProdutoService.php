@@ -78,6 +78,20 @@ class ProdutoService
         return $this->produtoModel->update($id, $data);
     }
 
+    /**
+     * Debita o estoque de um produto de forma simples
+     */
+    public function debitarEstoque(int $produtoId, int $quantidade): bool
+    {
+        $produto = $this->getById($produtoId);
+        if (!$produto) {
+            return false;
+        }
+
+        $novoEstoque = max(0, $produto->estoque - (int)$quantidade);
+        return $this->produtoModel->update($produtoId, ['estoque' => $novoEstoque]);
+    }
+
     public function delete(int|string $id): bool
     {
         return $this->produtoModel->delete($id);
@@ -106,6 +120,15 @@ class ProdutoService
         }
 
         return $query->get();
+    }
+
+    public function getProdutosBaixoEstoque(int $limite = 10): array
+    {
+        return $this->produtoModel
+            ->where('estoque', '<=', $limite)
+            ->where('ativo', '=', 1)
+            ->orderBy('estoque', 'ASC')
+            ->get();
     }
 
     /**

@@ -130,21 +130,25 @@
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
                     <?php if ($pedido->status === 'aguardando'): ?>
                         <form action="/admin/pedidos/<?= $pedido->id ?>/status" method="POST">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="status" value="separacao">
                             <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">Aprovar Pedido</button>
                         </form>
                     <?php elseif ($pedido->status === 'separacao'): ?>
                         <form action="/admin/pedidos/<?= $pedido->id ?>/status" method="POST">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="status" value="saiu_entrega">
                             <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">Despachar Pedido</button>
                         </form>
                     <?php elseif ($pedido->status === 'saiu_entrega'): ?>
                         <form action="/admin/pedidos/<?= $pedido->id ?>/status" method="POST">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="status" value="entregue">
                             <button class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">Marcar como Entregue</button>
                         </form>
                     <?php elseif ($pedido->status === 'entregue'): ?>
                         <form action="/admin/pedidos/<?= $pedido->id ?>/status" method="POST">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="status" value="cancelado">
                             <button class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">Cancelar Pedido</button>
                         </form>
@@ -152,6 +156,7 @@
 
                     <?php if ($pedido->status !== 'cancelado' && $pedido->status !== 'entregue'): ?>
                         <form action="/admin/pedidos/<?= $pedido->id ?>/status" method="POST" onsubmit="return confirm('Cancelar este pedido?')">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="status" value="cancelado">
                             <button class="w-full border border-red-200 text-red-500 py-2 rounded-lg text-sm font-bold hover:bg-red-50 transition">Cancelar Pedido</button>
                         </form>

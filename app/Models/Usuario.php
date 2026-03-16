@@ -17,6 +17,11 @@ class Usuario extends Model
         'role'
     ];
 
+    protected array $hidden = [
+        'senha',
+        'cpf'
+    ];
+
     public function enderecos()
     {
         return $this->hasMany(Endereco::class, 'usuario_id');
