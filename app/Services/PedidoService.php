@@ -8,6 +8,8 @@ use App\Models\Carrinho;
 use App\Models\CarrinhoItem;
 use App\Models\Promocao;
 use Core\Database\Connection;
+use Core\Queue\QueueManager;
+use App\Jobs\SendOrderStatusEmailJob;
 
 class PedidoService
 {
@@ -64,9 +66,9 @@ class PedidoService
                 'valor_total' => $total,
                 'taxa_entrega' => 5.00, // Taxa fixa exemplo
                 'forma_pagamento_entrega' => $dados['pagamento'],
-                'necessita_troco_para' => $dados['troco'] ?? null,
+                'necessita_troco_para' => (!empty($dados['troco'])) ? (float)$dados['troco'] : null,
                 'status' => 'aguardando',
-                'observacoes' => $dados['observacoes'] ?? null
+                'observacoes' => !empty($dados['observacoes']) ? $dados['observacoes'] : null
             ]);
 
             $pedidoItemModel = new PedidoItem();
@@ -92,12 +94,55 @@ class PedidoService
     /**
      * Busca um pedido específico com seus itens e produtos
      */
-    public function getPedidoWithItens(int $pedidoId, int $usuarioId): ?Pedido
+    public function getPedidoWithItens(int $pedidoId, ?int $usuarioId = null): ?Pedido
     {
-        return (new Pedido())
-            ->where('id', '=', $pedidoId)
-            ->where('usuario_id', '=', $usuarioId)
-            ->with('itens', 'endereco')
-            ->first();
+        $query = (new Pedido())->where('id', '=', $pedidoId);
+        
+        if ($usuarioId) {
+            $query->where('usuario_id', '=', $usuarioId);
+        }
+
+        return $query->with('itens', 'endereco', 'usuario')->first();
+    }
+
+    /**
+     * Busca todos os pedidos para o Admin
+     */
+    public function getAll(): array
+    {
+        return (new Pedido())->with('usuario', 'endereco')->orderBy('created_at', 'DESC')->get();
+    }
+
+    /**
+     * Conta o total de pedidos
+     */
+    public function count(): int
+    {
+        return (new Pedido())->count();
+    }
+
+    /**
+     * Atualiza o status de um pedido e notifica o cliente via JOB
+     */
+    public function updateStatus(int $pedidoId, string $status): bool
+    {
+        $pedidoModel = new Pedido();
+        $pedidoExistente = $pedidoModel->where('id', '=', $pedidoId)->first();
+        
+        if (!$pedidoExistente) {
+            return false;
+        }
+
+        $success = $pedidoModel->update($pedidoId, [
+            'status' => $status,
+            'notificado_em' => date('Y-m-d H:i:s')
+        ]);
+
+        if ($success) {
+            // Despacha o Job para enviar o e-mail em background
+            QueueManager::push(new SendOrderStatusEmailJob($pedidoId, $status));
+        }
+
+        return $success;
     }
 }

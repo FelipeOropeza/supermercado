@@ -22,7 +22,6 @@ class HomeController extends Controller
     }
 
     #[Get('/')]
-    #[Middleware('auth')]
     public function index()
     {
         // Se for uma requisição do HTMX pedindo apenas a lista

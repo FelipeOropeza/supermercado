@@ -15,6 +15,7 @@ use App\Services\CategoriaService;
 use App\Services\ProdutoService;
 use App\Services\PromocaoService;
 use App\Services\AcessoService;
+use App\Services\PedidoService;
 use Core\Http\Response;
 
 class AdminController
@@ -23,6 +24,7 @@ class AdminController
     private ProdutoService $produtoService;
     private PromocaoService $promocaoService;
     private AcessoService $acessoService;
+    private PedidoService $pedidoService;
 
     private function checkRole(array $allowedRoles): void
     {
@@ -40,6 +42,7 @@ class AdminController
         $this->produtoService   = app(ProdutoService::class);
         $this->promocaoService  = app(PromocaoService::class);
         $this->acessoService    = app(AcessoService::class);
+        $this->pedidoService    = app(PedidoService::class);
     }
 
     public function dashboard(): mixed
@@ -428,5 +431,51 @@ class AdminController
 
         session()->set('success', 'Acesso excluído com sucesso!');
         return Response::makeRedirect('/admin/acessos');
+    }
+
+    public function pedidos(): mixed
+    {
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        $pedidos = $this->pedidoService->getAll();
+
+        return view('admin/pedidos/index', [
+            'pedidos' => $pedidos
+        ]);
+    }
+
+    public function pedidosShow(int|string $id): mixed
+    {
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        $pedido = $this->pedidoService->getPedidoWithItens((int)$id);
+
+        if (!$pedido) {
+            session()->set('error', 'Pedido não encontrado.');
+            return Response::makeRedirect('/admin/pedidos');
+        }
+
+        return view('admin/pedidos/show', [
+            'pedido' => $pedido
+        ]);
+    }
+
+    public function pedidosUpdateStatus(int|string $id): Response
+    {
+        $this->checkRole(['admin', 'gerente', 'funcionario']);
+        $status = request()->get('status');
+        
+        $validStatus = ['aguardando', 'separacao', 'saiu_entrega', 'entregue', 'cancelado'];
+        
+        if (!in_array($status, $validStatus)) {
+            session()->set('error', 'Status inválido.');
+            return Response::makeRedirect('/admin/pedidos');
+        }
+
+        if ($this->pedidoService->updateStatus((int)$id, $status)) {
+            session()->set('success', 'Status do pedido atualizado com sucesso!');
+        } else {
+            session()->set('error', 'Erro ao atualizar status.');
+        }
+
+        return Response::makeRedirect('/admin/pedidos');
     }
 }

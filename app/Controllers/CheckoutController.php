@@ -60,12 +60,15 @@ class CheckoutController extends Controller
         if (empty($dados['endereco_id'])) {
             return Response::makeRedirectBack()->setStatusCode(422); // Idealmente com erro na sessão
         }
-
+        
         try {
             $pedidoId = $this->pedidoService->criarPedido($usuarioId, $dados);
             return Response::makeRedirect('/checkout/sucesso/' . $pedidoId);
+        } catch (\PDOException $e) {
+            logger()->error("Erro de banco ao criar pedido: " . $e->getMessage());
+            return Response::makeRedirectBack();
         } catch (\Exception $e) {
-            // Em caso de erro, volta com mensagem
+            logger()->error("Erro ao criar pedido: " . $e->getMessage());
             return Response::makeRedirectBack();
         }
     }

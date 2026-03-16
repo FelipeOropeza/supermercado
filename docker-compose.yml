@@ -41,6 +41,22 @@ services:
       - redis
     restart: unless-stopped
 
+  # Worker de Fila (Processa e-mails e tarefas pesadas)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mvc_worker
+    command: php /app/forge queue:work
+    volumes:
+      - .:/app
+    environment:
+      - APP_ENV=local
+    depends_on:
+      - app
+      - redis
+    restart: unless-stopped
+
   # Banco de Dados Redis para Cache e Filas
   redis:
     image: redis:alpine

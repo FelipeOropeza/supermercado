@@ -53,10 +53,10 @@ Este documento serve como um mapa (Roadmap) para guiá-lo no desenvolvimento do 
 ## 🚚 Fase 6: Logística e Monitoramento dos Encomendas
 **Foco:** Fluxos diários de andamento para o cliente e gestor.
 - [x] **Acompanhamento no Front (Cliente):** O usuário deve acessar a guia "Meus Pedidos" e ver em qual *status* o pedido recém efetuado dele está, junto aos itens.
-- [ ] **Quadro Operacional Diário (Admin):** Uma tela estilo "Kanban" no Admin para enxergar pedidos `pendentes`.  
-- [ ] O funcionário aprova, mandando o status para `separacao` ou cancelando. 
-- [ ] Quando despachar, muda para `saiu_entrega` (sinalizando a maquininha ou o exato troco anotado pro motoboy)
-- [ ] Registrar na coluna de log/auditoria do banco (ex: `notificado_em`) avisando o cliente via E-mail (módulo *SMTP/PHPMailer*) a mudança de cada status.
+- [x] **Quadro Operacional Diário (Admin):** Uma tela estilo "Kanban" no Admin para enxergar pedidos `pendentes`.  
+- [x] O funcionário aprova, mandando o status para `separacao` ou cancelando. 
+- [x] Quando despachar, muda para `saiu_entrega` (sinalizando a maquininha ou o exato troco anotado pro motoboy)
+- [x] Registrar na coluna de log/auditoria do banco (ex: `notificado_em`) avisando o cliente via E-mail (módulo *SMTP/PHPMailer*) a mudança de cada status.
 
 ---
 

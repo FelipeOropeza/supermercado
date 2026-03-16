@@ -7,6 +7,12 @@ use Core\Routing\Route;
 // Protegido pelo middleware 'admin' que será verificado
 Route::group(['prefix' => '/admin', 'middleware' => 'admin'], function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    
+    // Gestão de Pedidos (Logística)
+    Route::get('/pedidos', [AdminController::class, 'pedidos'])->name('admin.pedidos.index');
+    Route::get('/pedidos/{id}', [AdminController::class, 'pedidosShow'])->name('admin.pedidos.show');
+    Route::post('/pedidos/{id}/status', [AdminController::class, 'pedidosUpdateStatus'])->name('admin.pedidos.status');
+
     Route::get('/categorias', [AdminController::class, 'categorias'])->name('admin.categorias.index');
     Route::get('/categorias/create', [AdminController::class, 'categoriasCreate'])->name('admin.categorias.create');
     Route::post('/categorias', [AdminController::class, 'categoriasStore'])->name('admin.categorias.store');
