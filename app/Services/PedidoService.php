@@ -106,11 +106,30 @@ class PedidoService
     }
 
     /**
-     * Busca todos os pedidos para o Admin
+     * Busca todos os pedidos para o Admin com filtros opcionais
      */
-    public function getAll(): array
+    public function getAll(array $filters = []): array
     {
-        return (new Pedido())->with('usuario', 'endereco')->orderBy('created_at', 'DESC')->get();
+        $query = (new Pedido())->with('usuario', 'endereco');
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->join('usuarios', 'usuarios.id = pedidos.usuario_id')
+                  ->where(function($q) use ($search) {
+                      $q->where('pedidos.id', 'LIKE', "%$search%")
+                        ->orWhere('usuarios.nome', 'LIKE', "%$search%");
+                  });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('pedidos.status', '=', $filters['status']);
+        }
+
+        if (!empty($filters['date'])) {
+            $query->where('pedidos.created_at', 'LIKE', $filters['date'] . '%');
+        }
+
+        return $query->orderBy('pedidos.created_at', 'DESC')->get();
     }
 
     /**

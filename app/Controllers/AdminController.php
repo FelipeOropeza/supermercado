@@ -436,7 +436,20 @@ class AdminController
     public function pedidos(): mixed
     {
         $this->checkRole(['admin', 'gerente', 'funcionario']);
-        $pedidos = $this->pedidoService->getAll();
+        
+        $filters = [
+            'search' => request()->get('search'),
+            'status' => request()->get('status'),
+            'date'   => request()->get('date', date('Y-m-d'))
+        ];
+
+        $pedidos = $this->pedidoService->getAll($filters);
+
+        if (request()->header('HX-Request')) {
+            return view('admin/pedidos/kanban', [
+                'pedidos' => $pedidos
+            ]);
+        }
 
         return view('admin/pedidos/index', [
             'pedidos' => $pedidos

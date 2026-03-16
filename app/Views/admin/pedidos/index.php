@@ -3,69 +3,63 @@
 <?php $this->section('content'); ?>
 <div class="h-screen flex flex-col bg-gray-50">
     <!-- Clean Header -->
-    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-4">
-            <a href="/admin" class="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            </a>
-            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Logística de Pedidos</h1>
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex flex-col gap-4 shrink-0">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/admin" class="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                </a>
+                <h1 class="text-xl font-bold text-gray-900 tracking-tight">Logística de Pedidos</h1>
+            </div>
+            
+            <!-- Filter Bar -->
+            <form 
+                hx-get="/admin/pedidos" 
+                hx-target="#kanban-container" 
+                hx-trigger="keyup from:#search-input delay:500ms, change from:select, change from:input[type=date]"
+                class="flex items-center gap-3"
+            >
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </span>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        id="search-input"
+                        placeholder="Buscar por ID ou Cliente..." 
+                        class="bg-gray-50 border border-gray-200 rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none w-64 transition-all"
+                    >
+                </div>
+
+                <input 
+                    type="date" 
+                    name="date" 
+                    value="<?= date('Y-m-d') ?>"
+                    class="bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                >
+
+                <select 
+                    name="status" 
+                    class="bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                >
+                    <option value="">Todos os Status</option>
+                    <option value="aguardando">Aguardando</option>
+                    <option value="separacao">Em Separação</option>
+                    <option value="saiu_entrega">Saiu para Entrega</option>
+                    <option value="entregue">Entregue</option>
+                </select>
+
+                <button type="button" onclick="window.location.reload()" class="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors" title="Atualizar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </button>
+            </form>
         </div>
-        <button onclick="window.location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-            Atualizar Painel
-        </button>
     </header>
 
-    <!-- Kanban Board -->
-    <div class="flex-1 overflow-x-auto p-6">
-        <div class="flex h-full gap-6 min-w-max">
-            
-            <?php 
-            $columns = [
-                'aguardando' => ['title' => 'Aguardando', 'color' => 'blue'],
-                'separacao'  => ['title' => 'Em Separação', 'color' => 'blue'],
-                'saiu_entrega' => ['title' => 'Saiu para Entrega', 'color' => 'blue'],
-                'entregue'   => ['title' => 'Entregue', 'color' => 'gray']
-            ];
-            ?>
-
-            <?php foreach ($columns as $status => $info): ?>
-                <div class="flex flex-col w-80 bg-gray-100/50 rounded-xl border border-gray-200">
-                    <!-- Column Title -->
-                    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-                        <span class="text-sm font-bold text-gray-700 uppercase tracking-wider"><?= $info['title'] ?></span>
-                        <span class="bg-white border border-gray-200 text-gray-500 text-xs px-2 py-1 rounded-md font-bold">
-                            <?= count(array_filter($pedidos, fn($p) => $p->status === $status)) ?>
-                        </span>
-                    </div>
-
-                    <!-- Cards Area -->
-                    <div class="flex-1 overflow-y-auto p-3 space-y-3">
-                        <?php foreach ($pedidos as $pedido): ?>
-                            <?php if ($pedido->status === $status): ?>
-                                <a href="/admin/pedidos/<?= $pedido->id ?>" class="block bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="text-[11px] font-bold text-blue-600">#<?= str_pad((string)$pedido->id, 5, '0', STR_PAD_LEFT) ?></span>
-                                        <span class="text-[10px] text-gray-400 font-medium"><?= date('H:i', strtotime($pedido->created_at)) ?></span>
-                                    </div>
-                                    
-                                    <h4 class="text-sm font-bold text-gray-800 truncate mb-1"><?= htmlspecialchars($pedido->usuario->nome ?? 'Cliente') ?></h4>
-                                    <p class="text-[11px] text-gray-500 truncate mb-3 italic"><?= htmlspecialchars($pedido->endereco->rua ?? 'Sem endereço') ?></p>
-
-                                    <div class="flex items-center justify-between pt-3 border-t border-gray-50">
-                                        <span class="text-sm font-black text-gray-900">R$ <?= number_format($pedido->valor_total + $pedido->taxa_entrega, 2, ',', '.') ?></span>
-                                        
-                                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                        </div>
-                                    </div>
-                                </a>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-
-        </div>
+    <!-- Kanban Board Container -->
+    <div class="flex-1 overflow-x-auto p-6" id="kanban-container">
+        <?php echo view('admin/pedidos/kanban', ['pedidos' => $pedidos]); ?>
     </div>
 </div>
 <?php $this->endSection(); ?>
