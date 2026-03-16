@@ -55,6 +55,9 @@ class AuthController
     {
         $usuario = $this->authService->registrar($dto);
 
+        // Regenera a sessão após o registro para evitar fixation (OWASP)
+        session()->regenerate();
+
         session()->set('user', [
             'id' => $usuario->id,
             'nome' => $usuario->nome,

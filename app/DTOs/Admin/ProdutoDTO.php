@@ -9,6 +9,7 @@ use Core\Attributes\IsInt;
 use Core\Attributes\IsFloat;
 use Core\Attributes\Min;
 use Core\Attributes\Max;
+use Core\Attributes\Trim;
 use Core\Validation\DataTransferObject;
 use Core\Attributes\Required;
 
@@ -17,6 +18,7 @@ class ProdutoDTO extends DataTransferObject
     #[Required(message: 'Campo obrigatório.')]
     #[Min(3, message: 'Mínimo de 3 caracteres.')]
     #[Max(100, message: 'Máximo de 100 caracteres.')]
+    #[Trim]
     public string $nome;
 
     #[Required(message: 'Campo obrigatório.')]
@@ -36,6 +38,7 @@ class ProdutoDTO extends DataTransferObject
     #[Required(message: 'Campo obrigatório.')]
     #[Min(3, message: 'Mínimo de 3 caracteres.')]
     #[Max(100, message: 'Máximo de 100 caracteres.')]
+    #[Trim]
     public string $descricao;
 
     #[Image(maxSizeMB: 5, mimes: ['image/jpeg', 'image/png'], message: 'Arquivo de imagem inválido.')]
