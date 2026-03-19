@@ -132,9 +132,9 @@ class ProdutoService
     }
 
     /**
-     * Busca produtos por termo, categoria e ordenação
+     * Busca produtos por termo, categoria e ordenação (com suporte opcional a paginação)
      */
-    public function search(?string $term = null, ?int $categoria_id = null, ?string $orderBy = null): array
+    public function search(?string $term = null, ?int $categoria_id = null, ?string $orderBy = null, ?int $perPage = null): array
     {
         $query = $this->produtoModel->where('ativo', '=', 1);
 
@@ -164,6 +164,10 @@ class ProdutoService
             }
         } else {
             $query->orderBy('created_at', 'DESC');
+        }
+
+        if ($perPage) {
+            return $query->paginate($perPage);
         }
 
         return $query->get();

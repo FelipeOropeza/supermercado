@@ -36,43 +36,38 @@
     </div>
 
     <!-- Conteúdo -->
-    <div class="p-4 flex flex-col flex-grow">
-        <h3 class="text-sm font-bold text-gray-800 line-clamp-2 min-h-[40px] leading-tight hover:text-green-600 transition mb-1">
+    <div class="p-5 flex flex-col flex-grow">
+        <h3 class="text-base md:text-lg font-extrabold text-gray-900 line-clamp-2 min-h-[48px] leading-tight hover:text-emerald-700 transition mb-2">
             <a href="/produto/<?= $produto->id ?>"><?= e($produto->nome) ?></a>
         </h3>
         
-        <div class="mt-auto pt-2">
+        <div class="mt-auto pt-4 border-t border-gray-50">
             <div class="flex flex-col">
                 <?php if ($produto->preco_promocional ?? false): ?>
-                    <span class="text-xs text-gray-400 line-through">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
-                    <span class="text-lg font-black text-red-600">R$ <?= number_format($produto->preco_promocional, 2, ',', '.') ?></span>
+                    <span class="text-xs text-gray-400 line-through font-medium">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
+                    <span class="text-xl md:text-2xl font-black text-red-600 tracking-tight">R$ <?= number_format($produto->preco_promocional, 2, ',', '.') ?></span>
                 <?php else: ?>
-                    <span class="text-lg font-black text-gray-900">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
+                    <span class="text-xl md:text-2xl font-black text-emerald-950 tracking-tight">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
                 <?php endif; ?>
             </div>
         </div>
 
         <!-- Botão de Ação -->
-        <div class="mt-4 flex gap-2">
-            <!-- Botão Ver Detalhes (Apenas Mobile/Tablet para clareza, Desktop já tem o overlay) -->
-            <a href="/produto/<?= $produto->id ?>" class="lg:hidden flex-1 border border-gray-200 text-gray-500 rounded-xl flex items-center justify-center hover:bg-gray-50 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </a>
-
+        <div class="mt-auto pt-5">
             <?php if (!session()->has('user')): ?>
-                <a href="/login" class="flex-[3] bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 text-xs text-center leading-tight">
-                    Login para comprar
+                <a href="/login" class="w-full bg-emerald-50 text-emerald-950 border border-emerald-200 font-extrabold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest leading-none hover:bg-emerald-100">
+                    Entrar para Comprar
                 </a>
             <?php else: ?>
                 <button 
                     hx-post="/carrinho/add/<?= $produto->id ?>"
                     hx-swap="none"
-                    class="flex-[3] bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-xl transition shadow-sm hover:shadow-green-100 flex items-center justify-center gap-2 active:scale-95"
+                    class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95 text-xs uppercase tracking-widest"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    <span class="text-sm">Adicionar</span>
+                    <span>Comprar</span>
                 </button>
             <?php endif; ?>
         </div>

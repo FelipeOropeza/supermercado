@@ -31,17 +31,13 @@ class HomeController extends Controller
 
         $today = date('Y-m-d H:i:s');
 
-        // Busca promoções ativas com destaque folheto = 1
+        // Busca promoções ativas com destaque folheto = 1 (com Eager Loading de produto)
         $promocoes = (new Promocao())
+            ->with('produto')
             ->where('data_inicio', '<=', $today)
             ->where('data_fim', '>=', $today)
             ->where('destaque_folheto', '=', '1')
             ->get();
-
-        // Faz o eager loading do produto para cada promoção
-        foreach ($promocoes as $promocao) {
-            $promocao->produto = $promocao->produto();
-        }
 
         $data = [
             'title' => 'Início | Supermercado',
@@ -61,19 +57,31 @@ class HomeController extends Controller
         $today = date('Y-m-d H:i:s');
         $categorias = $this->categoriaService->getAll();
         
+        $produtoIds = [];
         foreach ($categorias as $categoria) {
-            // Buscamos apenas 5 produtos para servir como preview de cada categoria
             $categoria->produtos = $this->produtoService->getByCategoria($categoria->id, 5);
-            
             foreach ($categoria->produtos as $produto) {
-                $promocaoAtiva = (new Promocao())
-                    ->where('produto_id', '=', $produto->id)
-                    ->where('data_inicio', '<=', $today)
-                    ->where('data_fim', '>=', $today)
-                    ->first();
+                $produtoIds[] = $produto->id;
+            }
+        }
+
+        if (!empty($produtoIds)) {
+            $promocoesAtivas = (new Promocao())
+                ->whereIn('produto_id', $produtoIds)
+                ->where('data_inicio', '<=', $today)
+                ->where('data_fim', '>=', $today)
+                ->get();
                 
-                if ($promocaoAtiva) {
-                    $produto->preco_promocional = $promocaoAtiva->preco_promocional;
+            $mapaPromocoes = [];
+            foreach ($promocoesAtivas as $promo) {
+                $mapaPromocoes[$promo->produto_id] = $promo->preco_promocional;
+            }
+            
+            foreach ($categorias as $categoria) {
+                foreach ($categoria->produtos as $produto) {
+                    if (isset($mapaPromocoes[$produto->id])) {
+                        $produto->preco_promocional = $mapaPromocoes[$produto->id];
+                    }
                 }
             }
         }
@@ -91,14 +99,11 @@ class HomeController extends Controller
     {
         $today = date('Y-m-d H:i:s');
         $promocoes = (new Promocao())
+            ->with('produto')
             ->where('data_inicio', '<=', $today)
             ->where('data_fim', '>=', $today)
             ->where('destaque_folheto', '=', '1')
             ->get();
-
-        foreach ($promocoes as $promocao) {
-            $promocao->produto = $promocao->produto();
-        }
 
         return view('components/promocoes_grid', ['promocoes' => $promocoes]);
     }
@@ -118,33 +123,46 @@ class HomeController extends Controller
 
         $categorias = $this->categoriaService->getAll();
         
-        // Aplica filtros se houver
         $order = request()->get('order');
-        $produtos = $this->produtoService->search(null, $id, $order);
+        // Busca paginada por categoria (12 por página)
+        $paginated = $this->produtoService->search(null, $id, $order, 12);
+        $produtos = $paginated['data'];
 
-        // Verifica se há promoções ativas para estes produtos
+        // Verifica se há promoções ativas para estes produtos numa só query
         $today = date('Y-m-d H:i:s');
-        foreach ($produtos as $produto) {
-            $promocaoAtiva = (new Promocao())
-                ->where('produto_id', '=', $produto->id)
+        $produtoIds = array_map(fn($p) => $p->id, $produtos);
+        if (!empty($produtoIds)) {
+            $promocoesAtivas = (new Promocao())
+                ->whereIn('produto_id', $produtoIds)
                 ->where('data_inicio', '<=', $today)
                 ->where('data_fim', '>=', $today)
-                ->first();
+                ->get();
+                
+            $mapaPromo = [];
+            foreach ($promocoesAtivas as $promo) {
+                $mapaPromo[$promo->produto_id] = $promo->preco_promocional;
+            }
             
-            if ($promocaoAtiva) {
-                $produto->preco_promocional = $promocaoAtiva->preco_promocional;
+            foreach ($produtos as $produto) {
+                if (isset($mapaPromo[$produto->id])) {
+                    $produto->preco_promocional = $mapaPromo[$produto->id];
+                }
             }
         }
 
-        // Se for requisição HTMX para atualizar apenas o grid (filtros)
+        // Se for requisição HTMX para atualizar apenas o grid (filtros ou paginação)
         if (request()->header('HX-Request')) {
-            return view('components/produtos_grid', ['produtos' => $produtos]);
+            return view('components/produtos_grid', [
+                'produtos'  => $produtos,
+                'paginacao' => $paginated
+            ]);
         }
 
         return view('produtos/categoria', [
             'categoria'  => $categoria,
             'categorias' => $categorias,
-            'produtos'   => $produtos
+            'produtos'   => $produtos,
+            'paginacao'  => $paginated
         ]);
     }
 
@@ -159,29 +177,43 @@ class HomeController extends Controller
         $categoria_id = request()->get('categoria') ? (int)request()->get('categoria') : null;
         $order = request()->get('order');
 
-        $produtos = $this->produtoService->search($term, $categoria_id, $order);
+        // Busca paginada (12 por página)
+        $paginated = $this->produtoService->search($term, $categoria_id, $order, 12);
+        $produtos = $paginated['data'];
         $categorias = $this->categoriaService->getAll();
 
         $today = date('Y-m-d H:i:s');
-        foreach ($produtos as $produto) {
-            $promocaoAtiva = (new Promocao())
-                ->where('produto_id', '=', $produto->id)
+        $produtoIds = array_map(fn($p) => $p->id, $produtos);
+        if (!empty($produtoIds)) {
+            $promocoesAtivas = (new Promocao())
+                ->whereIn('produto_id', $produtoIds)
                 ->where('data_inicio', '<=', $today)
                 ->where('data_fim', '>=', $today)
-                ->first();
+                ->get();
+                
+            $mapaPromo = [];
+            foreach ($promocoesAtivas as $promo) {
+                $mapaPromo[$promo->produto_id] = $promo->preco_promocional;
+            }
             
-            if ($promocaoAtiva) {
-                $produto->preco_promocional = $promocaoAtiva->preco_promocional;
+            foreach ($produtos as $produto) {
+                if (isset($mapaPromo[$produto->id])) {
+                    $produto->preco_promocional = $mapaPromo[$produto->id];
+                }
             }
         }
 
         if (request()->header('HX-Request')) {
-            return view('components/produtos_grid', ['produtos' => $produtos]);
+            return view('components/produtos_grid', [
+                'produtos'  => $produtos,
+                'paginacao' => $paginated // Passa pra exibir controles dentro do grid se necessário
+            ]);
         }
 
         return view('produtos/busca', [
             'title'                => 'Busca: ' . ($term ?: 'Todos os produtos'),
             'produtos'             => $produtos,
+            'paginacao'            => $paginated,
             'categorias'           => $categorias,
             'term'                 => $term,
             'categoriaSelecionada' => $categoria_id
@@ -221,16 +253,24 @@ class HomeController extends Controller
         // Remove o produto atual das sugestões
         $sugestoes = array_filter($sugestoes, fn($p) => $p->id !== $produto->id);
 
-        // Preço promocional para sugestões
-        foreach ($sugestoes as $sugestao) {
-            $promo = (new Promocao())
-                ->where('produto_id', '=', $sugestao->id)
+        // Preço promocional para sugestões num só tiro
+        $sugestaoIds = array_map(fn($s) => $s->id, $sugestoes);
+        if (!empty($sugestaoIds)) {
+            $promocoesAtivas = (new Promocao())
+                ->whereIn('produto_id', $sugestaoIds)
                 ->where('data_inicio', '<=', $today)
                 ->where('data_fim', '>=', $today)
-                ->first();
+                ->get();
+                
+            $mapaPromo = [];
+            foreach ($promocoesAtivas as $promo) {
+                $mapaPromo[$promo->produto_id] = $promo->preco_promocional;
+            }
             
-            if ($promo) {
-                $sugestao->preco_promocional = $promo->preco_promocional;
+            foreach ($sugestoes as $sugestao) {
+                if (isset($mapaPromo[$sugestao->id])) {
+                    $sugestao->preco_promocional = $mapaPromo[$sugestao->id];
+                }
             }
         }
 

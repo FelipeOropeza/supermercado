@@ -9,14 +9,18 @@ class AdminSeeder
      */
     public function run(): void
     {
-        // Exemplo usando Model (ORM / Query Builder):
+        // Verifica se o admin já existe
         $usuario = new \App\Models\Usuario();
-        $usuario->insert([
-            'nome' => 'Admin',
-            'email' => 'admin@admin.com',
-            'senha' => password_hash('admin', PASSWORD_DEFAULT),
-            'role' => 'admin'
-        ]);
+        $exists = $usuario->where('email', '=', 'admin@admin.com')->first();
+        
+        if (!$exists) {
+            $usuario->insert([
+                'nome' => 'Admin',
+                'email' => 'admin@admin.com',
+                'senha' => password_hash('admin', PASSWORD_DEFAULT),
+                'role' => 'admin'
+            ]);
+        }
         
         // Se precisar criar múltiplos:
         // for ($i = 0; $i < 5; $i++) {
