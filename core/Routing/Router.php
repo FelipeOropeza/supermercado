@@ -36,10 +36,20 @@ class Router
         return $this->routes;
     }
 
-
     public function setRoutes(array $routes): self
     {
         $this->routes = $routes;
+        return $this;
+    }
+
+    public function getNamedRoutes(): array
+    {
+        return $this->namedRoutes;
+    }
+
+    public function setNamedRoutes(array $namedRoutes): self
+    {
+        $this->namedRoutes = $namedRoutes;
         return $this;
     }
 
