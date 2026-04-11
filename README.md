@@ -1,83 +1,89 @@
-# MVC Base Project (Micro Framework)
+# 🛒 Supermercado MVC — High-Performance E-commerce
 
-Um esqueleto PHP puro, ultra-leve e focado em performance (Stateless). Construído do zero para suportar a Arquitetura Moderna do PHP: Container de Injeção de Dependências (PSR-11 feeling), Cycle de Request/Response via Middlewares (PSR-15 feeling), Service Providers e preparado para servidores assíncronos como o FrankenPHP.
+![Status](https://img.shields.io/badge/Status-Project_Finalized-green?style=for-the-badge)
+![Tech](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Infrastructure](https://img.shields.io/badge/FrankenPHP-Worker_Mode-00ADD8?style=for-the-badge&logo=caddy&logoColor=white)
+![Engine](https://img.shields.io/badge/HTMX-Enabled-3D72D7?style=for-the-badge)
 
-## Principais Features Atuais
-
-* **Arquitetura Stateless**: Sem vazamentos globais (Globals como `$_GET` e `$_POST` são embalados no objeto `Request`). 
-* **Container de Injeção de Dependências (IoC)**: Autowiring de classes inteligentes via Reflection API. Funções Globais como `app()` e `logger()`.
-* **Sessões e Proteção CSRF Nativa**: Gerenciamento de sessão Orientado a Objetos integrado ao pipeline (Middlewares) e proteção fácil de formulários contra ataques Cross-Site Request Forgery.
-* **Router Expressivo e Rápido**: Suporte a parâmetros dinâmicos na URL, **Grupos de Rotas** (com prefixos e middlewares aninhados) e Namespaces limpos.
-* **Docker & FrankenPHP Integrado**: Ambiente pronto para a nuvem (Render, AWS) e desenvolvedores. Utiliza a imagem oficial do FrankenPHP baseada em Debian operando com o cobiçado **Worker Mode** para performance extrema na casa dos milissegundos.
-* **Service Providers Lifecycle**: Motor flexível similar ao Laravel, permitindo construção modular de recursos através de classes simples no `config/app.php`.
-* **Database Avançado (ORM)**: Modelos trazem um `QueryBuilder` embutido para queries complexas fluidas, Suporte a Relacionamentos (`belongsTo`, `hasMany`), e Gatilhos de Mutação e Validação acoplados.
-* **Upload Seguro e Storage**: Abstração Orientada a Objetos robusta para manipulação e validação de `UploadedFile`.
-* **Segurança e Log de Falhas**: Exceções são silenciadas no arquivo `storage/logs/app.log` se o modo de debug estiver inativo (`APP_DEBUG=false`), blindando a visão do usuário final num Deploy de Produção.
-* **CLI (Forge)**: Uma ferramenta de console robusta e extensível para criar código pré-fabricado, regras customizadas e rodar migrações.
-
-## Documentação
-
-Para mergulhar fundo e aprender a separar a lógica da sua aplicação de forma profissional num MVC, construir modelos, usar o Validator baseado em PHP 8 Attributes e a CLI do Framework, consulte a documentação dedicada na pasta `docs/`:
-
-=> [Ler a Documentação do Motor MVC](docs/framework.md)
+Um ecossistema completo de supermercado online, construído sobre um **Micro-Framework MVC customizado** em PHP puro. O projeto foi desenhado sob a premissa de **Performance Extrema (Worker Mode)**, utilizando as tecnologias mais modernas de 2024/2025 para entregar uma experiência de Single Page Application (SPA) sem a complexidade de frameworks pesados de JS.
 
 ---
 
-## Início Rápido (Instalação e Teste)
+## ⚡ Diferenciais de Engenharia
 
-### Método 1: Via Composer (Recomendado)
-A forma mais fácil de criar a aplicação é rodar o `create-project`. Ele baixará a última versão, iniciará o **instalador interativo** e limpará os arquivos de instalação ao finalizar.
+Este não é apenas um CRUD. É um estudo de caso em arquitetura moderna de software:
 
-```bash
-composer create-project felipe-code/mvc-base nome-do-seu-projeto
-```
-
-### Método 2: Via Git Clone Manual
-Se preferir clonar o repositório, você pode engatilhar o instalador interativo logo em seguida com os comandos abaixo:
-
-```bash
-git clone https://github.com/FelipeOropeza/mvc-estrutura.git meu-app
-cd meu-app
-composer install
-composer run post-create-project-cmd
-```
-
-### Método 3: Via Docker (Alta Performance com FrankenPHP)
-O projeto já conta com o poderoso ambiente Docker pré-configurado. Se você possui o Docker instalado e quer máxima performance, basta levantar os containers, e ele montará automaticamente o PHP8 com o Worker Mode:
-
-```bash
-docker-compose up -d --build
-```
-
-Acesse `http://localhost:8000` no seu navegador. O Servidor FrankenPHP gerenciará nativamente a aplicação!
+*   **⚡ FrankenPHP Worker Mode**: A aplicação opera em modo persistente na memória, eliminando o overhead de boot do PHP em cada requisição. Respostas na casa dos **micro-segundos**.
+*   **📡 Comunicação em Tempo Real (Mercure)**: Integração nativa com o hub Mercure para notificações de estoque, atualizações de preços e alterações de status de pedidos via Server-Sent Events (SSE).
+*   **🧩 SPA-like UX via HTMX**: Navegação fluida e reativa através de interações parciais no DOM, minimizando o tráfego de rede e garantindo uma experiência premium.
+*   **🏗️ IoC & Autowiring**: Container de Injeção de Dependências robusto com suporte a Service Providers (estilo Laravel), facilitando a testabilidade e o desacoplamento.
+*   **🛡️ Segurança Industrial**: Proteção nativa contra CSRF, SQL Injection (PDO), XSS e uma camada de RBAC (Role-Based Access Control) granular para Admin, Gerentes e Clientes.
 
 ---
 
-### Iniciando o Servidor Local Seguro (Modo Tradicional via PHP CLI):
-Se não for usar o Docker, uma vez que o projeto esteja instanciado, inicie o servidor interno:
-```bash
-composer start
-```
-*(O script `start` apontará para `server.php` garantindo que testes locais reproduzem o travamento de segurança da pasta `/public` com eficiência absoluta).*
+## 🚀 Principais Funcionalidades
 
-Acesse `http://localhost:8000` no seu navegador.
+### 🛒 Frente de Loja (Público)
+*   **Vitrine Inteligente**: Promoções dinâmicas baseadas em datas de início/fim (Folheto Digital).
+*   **Busca Semântica**: Filtros rápidos por categoria e busca textual otimizada.
+*   **Carrinho Persistente**: Gerenciamento híbrido (Sessão + BD) para garantir que o cliente nunca perca seus itens.
+*   **Checkout Simplificado**: Fluxo de multi-endereços e definições de pagamento na entrega (Troco, Cartão, Dinheiro).
+
+### 🛠️ Painel Administrativo (Gestão)
+*   **Dashboard Executivo**: KPIs em tempo real, alertas de baixo estoque e totalizadores de faturamento.
+*   **Gestão de Inventário**: CRUD completo de produtos e categorias com suporte a **Soft Deletes**.
+*   **CRM & Acessos**: Controle total sobre usuários e hierarquia de permissões de funcionários.
+*   **Operação Logística**: Quadro **Kanban** para separação e despacho de pedidos, com atualização automática de estoque na entrega final.
 
 ---
 
-### Comandos Rápidos da CLI (Forge):
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+| :--- | :--- |
+| **Backend** | PHP 8.2+ (MVC Puro) |
+| **Servidor/Runtime** | FrankenPHP (Caddy), Docker Compose |
+| **Frontend** | Tailwind CSS 4, HTMX, JavaScript (ES6), Alpine.js |
+| **Real-time** | Mercure Hub (SSE) |
+| **Banco de Dados** | MySQL (PDO) com Query Builder Independente |
+
+---
+
+## 📦 Como Rodar (Quick Start)
+
+### 🐋 Via Docker (Obrigatório para Worker Mode)
+A experiência completa de performance só é alcançada utilizando o ambiente Docker configurado:
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/FelipeOropeza/supermercado.git
+   cd supermercado
+   ```
+
+2. Suba o ambiente:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+3. Acesse `http://localhost:8000`. O hub Mercure estará operando em `http://localhost:3000`.
+
+---
+
+## 🛠️ Ferramenta de Linha de Comando (Forge)
+O sistema acompanha o **Forge**, uma CLI poderosa para acelerar o desenvolvimento:
+
 ```bash
-php forge make:controller NomeController
-php forge make:model TabelaModel
-php forge make:view secao/nova-view
-php forge make:migration CreateUsersTable
-php forge make:middleware VerificarAcessoMiddleware
-php forge make:rule CpfValido
-php forge make:mutator LimpaCpf
+# Executar migrações
 php forge migrate
-php forge setup:engine twig
-php forge setup:auth
+
+# Criar novos componentes
+php forge make:controller NomeController
+php forge make:model NomeModel
+php forge make:migration CreateTableX
 ```
 
-## Licença
+---
 
-MIT
+## 📄 Licença
+
+Este projeto está sob a licença **MIT**. Desenvolvido com ❤️ por [Felipe Oropeza](https://github.com/FelipeOropeza).
